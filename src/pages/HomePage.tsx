@@ -211,94 +211,107 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-8 border-b border-ink-200 py-12 xl:grid-cols-[320px_minmax(0,820px)] dark:border-neutral-800">
-        <div>
-          <h2 className="text-3xl font-semibold leading-tight">
-            Know when the price actually moves.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-ink-600 dark:text-neutral-300">
-            Tracked products are items with an active price record. If someone
-            already started tracking the same product, future checks continue
-            that record for everyone.
-          </p>
-        </div>
-
-        <div className="divide-y divide-ink-200 border-y border-ink-200 bg-white dark:divide-neutral-800 dark:border-neutral-800 dark:bg-[#171717]">
-          {watchedProducts.map((product) => (
-            <div
-              key={product.name}
-              className="grid gap-4 p-4 text-sm sm:grid-cols-[1fr_120px_120px]"
-            >
-              <div className="min-w-0">
-                <div className="truncate font-medium">{product.name}</div>
-                <div className="mt-1 text-ink-500 dark:text-neutral-400">
-                  {product.store}
-                </div>
-              </div>
-              <div>
-                <div className="text-ink-500 line-through dark:text-neutral-500">
-                  {product.oldPrice}
-                </div>
-                <div className="mt-1 font-medium">{product.price}</div>
-              </div>
-              <div className="font-medium text-moss-700 dark:text-moss-500">
-                {product.drop}
-              </div>
+      <section className="border-b border-ink-200 py-12 dark:border-neutral-800">
+        <div className="grid gap-px border-y border-ink-200 bg-ink-200 xl:grid-cols-[minmax(0,1fr)_360px] dark:border-neutral-800 dark:bg-neutral-800">
+          <div className="bg-white p-5 sm:p-6 dark:bg-[#171717]">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <h2 className="max-w-xl text-3xl font-semibold leading-tight">
+                Know when the price actually moves.
+              </h2>
+              <p className="max-w-md text-base leading-7 text-ink-600 dark:text-neutral-300">
+                Tracked products keep one shared price record after the first
+                saved check, no matter who started watching the item.
+              </p>
             </div>
-          ))}
+
+            <div className="mt-6 grid gap-px border border-ink-200 bg-ink-200 md:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
+              {watchedProducts.map((product) => (
+                <article
+                  key={product.name}
+                  className="flex min-h-44 flex-col justify-between bg-white p-4 dark:bg-[#171717]"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0">
+                      <div className="truncate font-medium">
+                        {product.name}
+                      </div>
+                      <div className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
+                        {product.store}
+                      </div>
+                    </div>
+                    <div className="text-sm font-medium text-moss-700 dark:text-moss-500">
+                      {product.drop}
+                    </div>
+                  </div>
+
+                  <div className="mt-8 flex items-end justify-between gap-4">
+                    <div className="text-sm text-ink-500 line-through dark:text-neutral-500">
+                      {product.oldPrice}
+                    </div>
+                    <div className="text-right text-xl font-semibold">
+                      {product.price}
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <aside className="bg-ink-50 p-5 sm:p-6 dark:bg-neutral-900">
+            <h3 className="text-lg font-semibold">Shared product history</h3>
+            <p className="mt-3 text-sm leading-6 text-ink-600 dark:text-neutral-300">
+              If a product was tracked once, later checks continue that same
+              timeline. The history gets better as the store price is checked
+              again.
+            </p>
+            <Link
+              to="/tracked"
+              className="mt-6 inline-flex h-10 items-center gap-2 rounded-md border border-ink-200 bg-white px-4 text-sm font-medium transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:hover:bg-neutral-800"
+            >
+              Open tracked
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </aside>
         </div>
       </section>
 
-      <section className="grid gap-8 py-12 xl:grid-cols-[minmax(0,720px)_420px] xl:items-center xl:justify-between">
-        <div>
-          <h2 className="text-3xl font-semibold leading-tight">
-            Alerts start from tracked history.
-          </h2>
-          <p className="mt-4 max-w-2xl text-base leading-7 text-ink-600 dark:text-neutral-300">
-            A product does not need to be tracked separately by every visitor.
-            Once tracking starts, later price checks build the same history and
-            make in-app and email price-drop alerts possible.
-          </p>
-
-          <div className="mt-8 divide-y divide-ink-200 border-y border-ink-200 bg-white dark:divide-neutral-800 dark:border-neutral-800 dark:bg-[#171717]">
-            {alertRows.map((row, index) => (
-              <div
-                key={row.title}
-                className="grid gap-3 p-4 text-sm sm:grid-cols-[48px_1fr]"
-              >
-                <div className="font-medium text-ink-500 dark:text-neutral-400">
-                  {String(index + 1).padStart(2, "0")}
-                </div>
-                <div>
-                  <div className="font-medium">{row.title}</div>
-                  <div className="mt-1 leading-6 text-ink-500 dark:text-neutral-400">
-                    {row.text}
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mx-auto w-full max-w-[420px] border-y border-ink-200 bg-white p-4 dark:border-neutral-800 dark:bg-[#171717]">
+      <section className="grid gap-8 py-12 xl:grid-cols-[420px_minmax(0,1fr)] xl:items-stretch">
+        <div className="border-y border-ink-200 bg-white p-5 sm:p-6 dark:border-neutral-800 dark:bg-[#171717]">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Bell className="h-4 w-4 text-moss-700 dark:text-moss-500" />
             pricehistory.md
           </div>
-          <div className="mt-5 text-2xl font-semibold leading-tight">
+          <div className="mt-6 text-2xl font-semibold leading-tight">
             AirPods Pro 2 dropped by 350 MDL.
           </div>
           <p className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
             XStore now lists this watched product at 4,199 MDL. Previous
-            recorded price: 4,549 MDL. Email alert sent to your saved address.
+            recorded price: 4,549 MDL.
           </p>
-          <Link
-            to="/tracked"
-            className="mt-5 inline-flex h-10 items-center gap-2 rounded-md border border-ink-200 px-4 text-sm font-medium transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
-          >
-            Open tracked
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+
+          <div className="mt-6 border-t border-ink-200 pt-4 text-sm dark:border-neutral-800">
+            <div className="font-medium">Email alert sent</div>
+            <div className="mt-1 leading-6 text-ink-500 dark:text-neutral-400">
+              The saved contact receives the same price-drop notice as the app.
+            </div>
+          </div>
+        </div>
+
+        <div className="grid gap-px border-y border-ink-200 bg-ink-200 md:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
+          {alertRows.map((row, index) => (
+            <article
+              key={row.title}
+              className="bg-white p-5 dark:bg-[#171717]"
+            >
+              <div className="text-sm font-medium text-ink-500 dark:text-neutral-400">
+                {String(index + 1).padStart(2, "0")}
+              </div>
+              <div className="mt-8 text-lg font-semibold">{row.title}</div>
+              <div className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
+                {row.text}
+              </div>
+            </article>
+          ))}
         </div>
       </section>
     </div>
