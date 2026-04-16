@@ -25,14 +25,14 @@ export function Topbar() {
           <Link
             to="/home"
             className="flex min-w-0 items-center gap-2.5"
-            aria-label="PriceHistory.md home"
+            aria-label="pricehistory.md home"
           >
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-ink-900 text-moss-500 shadow-soft dark:bg-neutral-950">
               <BarChart3 className="h-5 w-5" />
             </span>
             <div className="hidden min-w-0 sm:block">
               <div className="truncate text-[15px] font-semibold">
-                PriceHistory.md
+                pricehistory.md
               </div>
               <div className="truncate text-xs text-ink-500 dark:text-neutral-400">
                 Track Moldova store prices
