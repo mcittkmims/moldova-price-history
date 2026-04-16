@@ -1,12 +1,9 @@
 import {
   ArrowRight,
   Bell,
-  ChevronLeft,
-  ChevronRight,
   Search,
   Store,
 } from "lucide-react";
-import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 
 const watchedProducts = [
@@ -58,26 +55,6 @@ const alertRows = [
 ];
 
 export function HomePage() {
-  const [storeIndex, setStoreIndex] = useState(0);
-  const visibleStores = useMemo(
-    () =>
-      Array.from({ length: Math.min(4, trackedStores.length) }, (_, offset) => {
-        const index = (storeIndex + offset) % trackedStores.length;
-        return trackedStores[index];
-      }),
-    [storeIndex],
-  );
-
-  const showPreviousStores = () => {
-    setStoreIndex(
-      (current) => (current - 1 + trackedStores.length) % trackedStores.length,
-    );
-  };
-
-  const showNextStores = () => {
-    setStoreIndex((current) => (current + 1) % trackedStores.length);
-  };
-
   return (
     <div className="mx-auto w-full max-w-[1500px] pb-12">
       <section className="grid min-h-[calc(100vh-10rem)] gap-8 border-b border-ink-200 py-10 xl:grid-cols-[minmax(480px,680px)_minmax(380px,460px)] xl:items-center xl:justify-between dark:border-neutral-800">
@@ -170,42 +147,34 @@ export function HomePage() {
       </section>
 
       <section className="border-b border-ink-200 py-12 dark:border-neutral-800">
-        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="mb-6 max-w-3xl">
           <h2 className="text-3xl font-semibold leading-tight">
             One search surfaces products from popular Moldova stores.
           </h2>
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={showPreviousStores}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-700 transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
-              aria-label="Show previous stores"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <button
-              type="button"
-              onClick={showNextStores}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-ink-200 bg-white text-ink-700 transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
-              aria-label="Show next stores"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {visibleStores.map((store) => (
+        <div className="overflow-hidden" aria-label="Tracked store sources">
+          <div className="store-carousel-track flex w-max">
+            {[0, 1].map((groupIndex) => (
               <div
-                key={store.name}
-                className="flex min-h-32 flex-col items-center justify-center rounded-lg border border-ink-200 bg-white px-5 py-5 text-center shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
+                key={groupIndex}
+                className="flex gap-4 pr-4"
+                aria-hidden={groupIndex === 1}
               >
-                <div className="flex h-12 w-12 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-lg font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
-                  {store.mark}
-                </div>
-                <div className="mt-3 text-sm font-medium">{store.name}</div>
+                {trackedStores.map((store) => (
+                  <div
+                    key={`${store.name}-${groupIndex}`}
+                    className="flex min-h-32 w-36 shrink-0 flex-col items-center justify-center rounded-lg border border-ink-200 bg-white px-5 py-5 text-center shadow-soft sm:w-44 xl:w-56 dark:border-neutral-800 dark:bg-[#171717]"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-lg font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
+                      {store.mark}
+                    </div>
+                    <div className="mt-3 text-sm font-medium">{store.name}</div>
+                  </div>
+                ))}
               </div>
             ))}
+          </div>
         </div>
       </section>
 
