@@ -1,4 +1,5 @@
 import { Outlet } from "react-router-dom";
+import { Footer } from "./Footer";
 import { Topbar } from "./Topbar";
 
 export function AppLayout() {
@@ -9,6 +10,7 @@ export function AppLayout() {
         <main className="mx-auto w-full max-w-7xl flex-1 px-5 py-6 md:px-7">
           <Outlet />
         </main>
+        <Footer />
       </div>
     </div>
   );
