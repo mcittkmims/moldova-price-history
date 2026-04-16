@@ -47,15 +47,15 @@ const trackedStores = [
 
 const alertRows = [
   {
-    title: "Tracking starts once",
+    title: "Start tracking once",
     text: "When you or anyone else starts tracking a product, the app begins recording future price checks for that item.",
   },
   {
-    title: "Every later check adds context",
+    title: "Keep the same history",
     text: "The price history grows from that first tracked moment, so the record becomes more useful over time.",
   },
   {
-    title: "Drops become alerts",
+    title: "Get the drop",
     text: "When a watched product moves down from its recorded price, you can see the alert in the app and receive it by email.",
   },
 ];
@@ -285,11 +285,10 @@ export function HomePage() {
 
       <section className="grid gap-8 py-12 xl:grid-cols-[420px_minmax(0,1fr)] xl:items-stretch">
         <div className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft sm:p-6 dark:border-neutral-800 dark:bg-[#171717]">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <Bell className="h-4 w-4 text-moss-700 dark:text-moss-500" />
-            pricehistory.md
+          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-moss-100 bg-moss-50 text-moss-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-moss-500">
+            <Bell className="h-4 w-4" />
           </div>
-          <div className="mt-6 text-2xl font-semibold leading-tight">
+          <div className="mt-5 text-2xl font-semibold leading-tight">
             AirPods Pro 2 dropped by 350 MDL.
           </div>
           <p className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
@@ -298,23 +297,19 @@ export function HomePage() {
           </p>
 
           <div className="mt-6 border-t border-ink-200 pt-4 text-sm dark:border-neutral-800">
-            <div className="font-medium">Email alert sent</div>
             <div className="mt-1 leading-6 text-ink-500 dark:text-neutral-400">
-              The saved contact receives the same price-drop notice as the app.
+              The saved contact receives the same price-drop notice by email.
             </div>
           </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          {alertRows.map((row, index) => (
+          {alertRows.map((row) => (
             <article
               key={row.title}
               className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
             >
-              <div className="text-sm font-medium text-ink-500 dark:text-neutral-400">
-                {String(index + 1).padStart(2, "0")}
-              </div>
-              <div className="mt-8 text-lg font-semibold">{row.title}</div>
+              <div className="text-lg font-semibold">{row.title}</div>
               <div className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
                 {row.text}
               </div>

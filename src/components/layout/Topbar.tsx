@@ -34,9 +34,6 @@ export function Topbar() {
               <div className="truncate text-[15px] font-semibold">
                 pricehistory.md
               </div>
-              <div className="truncate text-xs text-ink-500 dark:text-neutral-400">
-                Track Moldova store prices
-              </div>
             </div>
           </Link>
 

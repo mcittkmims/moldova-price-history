@@ -1,4 +1,4 @@
-import { Link, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import type {
   ProductCategory,
   ProductFilters,
@@ -96,11 +96,6 @@ export function SearchControls({
             <option value="drop">Biggest drop</option>
           </select>
         </label>
-      </div>
-
-      <div className="mt-3 flex items-center gap-2 text-sm text-ink-500 dark:text-neutral-400">
-        <Link className="h-4 w-4" />
-        Product links are matched against known mock store URLs.
       </div>
     </section>
   );

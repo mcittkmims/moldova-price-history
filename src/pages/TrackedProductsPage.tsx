@@ -93,9 +93,6 @@ export function TrackedProductsPage() {
           <h1 className="text-2xl font-semibold tracking-normal">
             Tracked products
           </h1>
-          <p className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-            Products saved in localStorage and restored on app load.
-          </p>
         </div>
         <div className="text-sm text-ink-500 dark:text-neutral-400">
           {loading ? "Loading" : `${visibleProducts.length} shown`}
