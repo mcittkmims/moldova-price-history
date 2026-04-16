@@ -1,0 +1,107 @@
+import { Link, Search } from "lucide-react";
+import type {
+  ProductCategory,
+  ProductFilters,
+  ProductSort,
+  StoreName,
+} from "../../types/product";
+
+type SearchControlsProps = {
+  filters: ProductFilters;
+  sort: ProductSort;
+  stores: StoreName[];
+  categories: ProductCategory[];
+  onFiltersChange: (filters: ProductFilters) => void;
+  onSortChange: (sort: ProductSort) => void;
+};
+
+export function SearchControls({
+  filters,
+  sort,
+  stores,
+  categories,
+  onFiltersChange,
+  onSortChange,
+}: SearchControlsProps) {
+  return (
+    <section className="rounded-lg border border-ink-200 bg-white p-4 shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
+      <div className="grid gap-4 lg:grid-cols-[1fr_180px_180px_170px]">
+        <label className="block">
+          <div className="mb-2 text-sm font-medium">Search</div>
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-500 dark:text-neutral-400" />
+            <input
+              value={filters.query}
+              onChange={(event) =>
+                onFiltersChange({ ...filters, query: event.target.value })
+              }
+              placeholder="Keyword or product link"
+              className="h-10 w-full rounded-md border border-ink-300 bg-white pl-9 pr-3 text-sm text-ink-900 placeholder:text-ink-500 dark:border-neutral-700 dark:bg-[#1a1a1a] dark:text-neutral-100 dark:placeholder:text-neutral-500"
+            />
+          </div>
+        </label>
+
+        <label className="block">
+          <div className="mb-2 text-sm font-medium">Store</div>
+          <select
+            value={filters.store}
+            onChange={(event) =>
+              onFiltersChange({
+                ...filters,
+                store: event.target.value as ProductFilters["store"],
+              })
+            }
+            className="h-10 w-full rounded-md border border-ink-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-[#1a1a1a]"
+          >
+            <option value="All">All stores</option>
+            {stores.map((store) => (
+              <option key={store} value={store}>
+                {store}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <div className="mb-2 text-sm font-medium">Category</div>
+          <select
+            value={filters.category}
+            onChange={(event) =>
+              onFiltersChange({
+                ...filters,
+                category: event.target.value as ProductFilters["category"],
+              })
+            }
+            className="h-10 w-full rounded-md border border-ink-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-[#1a1a1a]"
+          >
+            <option value="All">All categories</option>
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block">
+          <div className="mb-2 text-sm font-medium">Sort</div>
+          <select
+            value={sort}
+            onChange={(event) => onSortChange(event.target.value as ProductSort)}
+            className="h-10 w-full rounded-md border border-ink-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-[#1a1a1a]"
+          >
+            <option value="relevance">Relevance</option>
+            <option value="price-low">Lowest price</option>
+            <option value="price-high">Highest price</option>
+            <option value="drop">Biggest drop</option>
+          </select>
+        </label>
+      </div>
+
+      <div className="mt-3 flex items-center gap-2 text-sm text-ink-500 dark:text-neutral-400">
+        <Link className="h-4 w-4" />
+        Product links are matched against known mock store URLs.
+      </div>
+    </section>
+  );
+}
