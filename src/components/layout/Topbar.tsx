@@ -1,5 +1,6 @@
-import { Home, Moon, Search, ShoppingBag } from "lucide-react";
+import { Home, Moon, Search, ShoppingBag, Sun } from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
+import { useAppState } from "../../context/AppStateContext";
 
 const navItems = [
   { to: "/home", label: "Overview", icon: Home },
@@ -8,6 +9,8 @@ const navItems = [
 ];
 
 export function Topbar() {
+  const { theme, toggleTheme } = useAppState();
+
   return (
     <header className="border-b border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 md:px-7">
@@ -46,10 +49,15 @@ export function Topbar() {
         <div className="flex shrink-0 items-center gap-3">
           <button
             type="button"
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-ink-200 bg-white px-3 text-sm text-ink-800 transition-colors dark:border-neutral-700 dark:bg-[#1a1a1a] dark:text-neutral-100"
+            onClick={toggleTheme}
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-ink-200 bg-white px-3 text-sm text-ink-800 transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#1a1a1a] dark:text-neutral-100 dark:hover:bg-neutral-800"
           >
-            <Moon className="h-4 w-4" />
-            <span>Dark</span>
+            {theme === "light" ? (
+              <Moon className="h-4 w-4" />
+            ) : (
+              <Sun className="h-4 w-4" />
+            )}
+            <span>{theme === "light" ? "Dark" : "Light"}</span>
           </button>
         </div>
       </div>
