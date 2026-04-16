@@ -31,12 +31,12 @@ const watchedProducts = [
 ];
 
 const trackedStores = [
-  { name: "Darwin", mark: "D", detail: "Phones, laptops, accessories" },
-  { name: "Enter", mark: "E", detail: "Electronics and home tech" },
-  { name: "Maximum", mark: "M", detail: "Consumer electronics" },
-  { name: "Xstore", mark: "X", detail: "Apple products and accessories" },
-  { name: "Smart.md", mark: "S", detail: "Phones and smart devices" },
-  { name: "Bomba", mark: "B", detail: "Appliances and electronics" },
+  { name: "Darwin", mark: "D" },
+  { name: "Enter", mark: "E" },
+  { name: "Maximum", mark: "M" },
+  { name: "Xstore", mark: "X" },
+  { name: "Smart.md", mark: "S" },
+  { name: "Bomba", mark: "B" },
 ];
 
 const alertRows = [
@@ -50,7 +50,7 @@ const alertRows = [
   },
   {
     title: "Drops become alerts",
-    text: "When a watched product moves down from its recorded price, the alert shows the store, old price, and new price.",
+    text: "When a watched product moves down from its recorded price, you can see the alert in the app and receive it by email.",
   },
 ];
 
@@ -149,33 +149,32 @@ export function HomePage() {
       <section className="grid gap-8 border-b border-ink-200 py-12 xl:grid-cols-[320px_minmax(0,1fr)] dark:border-neutral-800">
         <div>
           <h2 className="text-3xl font-semibold leading-tight">
-            Stores people actually buy from.
+            One search surfaces products from popular Moldova stores.
           </h2>
           <p className="mt-4 text-base leading-7 text-ink-600 dark:text-neutral-300">
-            Store sources are visible, so each product has a clear origin
-            instead of looking like an anonymous listing.
+            Results show where each listing comes from, and the store list can
+            grow without changing the shape of the page.
           </p>
         </div>
 
-        <div className="grid max-w-5xl gap-px overflow-hidden border-y border-ink-200 bg-ink-200 sm:grid-cols-2 xl:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
-          {trackedStores.map((store) => (
-            <div
-              key={store.name}
-              className="flex min-h-28 items-center gap-4 bg-white p-4 dark:bg-[#171717]"
-            >
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-lg font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
-                {store.mark}
-              </div>
-              <div className="min-w-0">
-                <div className="truncate text-lg font-semibold">
-                  {store.name}
+        <div className="max-w-5xl border-y border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
+          <div className="flex gap-px overflow-x-auto bg-ink-200 dark:bg-neutral-800">
+            {trackedStores.map((store) => (
+              <div
+                key={store.name}
+                className="flex min-w-36 shrink-0 flex-col items-center justify-center bg-white px-5 py-5 text-center dark:bg-[#171717]"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-lg font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
+                  {store.mark}
                 </div>
-                <div className="mt-1 text-sm leading-6 text-ink-500 dark:text-neutral-400">
-                  {store.detail}
-                </div>
+                <div className="mt-3 text-sm font-medium">{store.name}</div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div className="border-t border-ink-200 px-4 py-3 text-sm text-ink-500 dark:border-neutral-800 dark:text-neutral-400">
+            New stores can be added to the same row without turning the section
+            into a growing table.
+          </div>
         </div>
       </section>
 
@@ -225,7 +224,7 @@ export function HomePage() {
           <p className="mt-4 max-w-2xl text-base leading-7 text-ink-600 dark:text-neutral-300">
             A product does not need to be tracked separately by every visitor.
             Once tracking starts, later price checks build the same history and
-            make price-drop alerts possible.
+            make in-app and email price-drop alerts possible.
           </p>
 
           <div className="mt-8 divide-y divide-ink-200 border-y border-ink-200 bg-white dark:divide-neutral-800 dark:border-neutral-800 dark:bg-[#171717]">
@@ -248,7 +247,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="border-y border-ink-200 bg-white p-4 dark:border-neutral-800 dark:bg-[#171717]">
+        <div className="mx-auto w-full max-w-[420px] border-y border-ink-200 bg-white p-4 dark:border-neutral-800 dark:bg-[#171717]">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Bell className="h-4 w-4 text-moss-700 dark:text-moss-500" />
             pricehistory.md
@@ -258,7 +257,7 @@ export function HomePage() {
           </div>
           <p className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
             XStore now lists this watched product at 4,199 MDL. Previous
-            recorded price: 4,549 MDL.
+            recorded price: 4,549 MDL. Email alert sent to your saved address.
           </p>
           <Link
             to="/tracked"
