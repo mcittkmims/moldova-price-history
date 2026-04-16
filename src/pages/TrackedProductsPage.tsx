@@ -87,7 +87,7 @@ export function TrackedProductsPage() {
   }, [distribution, products]);
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-[1500px] space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-normal">
@@ -103,8 +103,8 @@ export function TrackedProductsPage() {
       </div>
 
       <section className="rounded-lg border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
-        <div className="grid gap-0 lg:grid-cols-[minmax(0,1fr)_420px]">
-          <div className="border-b border-ink-200 p-5 lg:border-b-0 lg:border-r dark:border-neutral-800">
+        <div className="grid gap-0 xl:grid-cols-[minmax(0,1fr)_380px]">
+          <div className="border-b border-ink-200 p-5 xl:border-b-0 xl:border-r dark:border-neutral-800">
             <h2 className="text-lg font-semibold">Tracked summary</h2>
             <dl className="mt-4 divide-y divide-ink-200 text-sm dark:divide-neutral-800">
               <div className="flex items-center justify-between gap-4 py-3">
@@ -180,7 +180,7 @@ export function TrackedProductsPage() {
       </section>
 
       <section className="rounded-lg border border-ink-200 bg-white p-4 shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
-        <div className="grid gap-4 lg:grid-cols-[1fr_180px_180px_170px]">
+        <div className="grid gap-4 xl:grid-cols-[minmax(260px,1fr)_180px_180px_170px]">
           <div className="flex items-center gap-2 text-sm font-medium">
             <SlidersHorizontal className="h-4 w-4" />
             Filters
@@ -241,7 +241,7 @@ export function TrackedProductsPage() {
         </div>
       </section>
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         {visibleProducts.map((product) => (
           <ProductCard
             key={product.id}

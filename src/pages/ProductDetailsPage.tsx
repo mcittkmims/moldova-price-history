@@ -69,7 +69,7 @@ export function ProductDetailsPage() {
   const highest = getHighestPrice(product.history);
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-[1500px] space-y-5">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1 className="max-w-3xl text-2xl font-semibold tracking-normal">
@@ -108,7 +108,7 @@ export function ProductDetailsPage() {
         </div>
       </div>
 
-      <div className="grid gap-5 xl:grid-cols-[360px_1fr]">
+      <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
         <section className="min-w-0 overflow-hidden rounded-lg border border-ink-200 bg-white p-4 shadow-soft sm:p-5 dark:border-neutral-800 dark:bg-[#171717]">
           <div
             className="mb-5 grid h-36 place-items-center rounded-md border border-ink-200 dark:border-neutral-700"

@@ -41,7 +41,7 @@ export function SearchPage() {
   };
 
   return (
-    <div className="space-y-5">
+    <div className="mx-auto w-full max-w-[1500px] space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-normal">Search</h1>
@@ -63,7 +63,7 @@ export function SearchPage() {
         onSortChange={handleSortChange}
       />
 
-      <div className="grid gap-4 lg:grid-cols-2">
+      <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
         {products.map((product) => (
           <ProductCard
             key={product.id}
