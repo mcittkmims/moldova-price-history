@@ -107,7 +107,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="border-y border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
+        <div className="overflow-hidden rounded-lg border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
           <div className="border-b border-ink-200 p-4 dark:border-neutral-800">
             <div className="flex items-center gap-2 rounded-md border border-ink-200 bg-ink-50 px-3 py-2 text-sm text-ink-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
               <Search className="h-4 w-4" />
@@ -194,12 +194,11 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="border-y border-ink-200 bg-ink-200 dark:border-neutral-800 dark:bg-neutral-800">
-          <div className="grid gap-px sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             {visibleStores.map((store) => (
               <div
                 key={store.name}
-                className="flex min-h-32 flex-col items-center justify-center bg-white px-5 py-5 text-center dark:bg-[#171717]"
+                className="flex min-h-32 flex-col items-center justify-center rounded-lg border border-ink-200 bg-white px-5 py-5 text-center shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
               >
                 <div className="flex h-12 w-12 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-lg font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
                   {store.mark}
@@ -207,13 +206,12 @@ export function HomePage() {
                 <div className="mt-3 text-sm font-medium">{store.name}</div>
               </div>
             ))}
-          </div>
         </div>
       </section>
 
       <section className="border-b border-ink-200 py-12 dark:border-neutral-800">
-        <div className="grid gap-px border-y border-ink-200 bg-ink-200 xl:grid-cols-[minmax(0,1fr)_360px] dark:border-neutral-800 dark:bg-neutral-800">
-          <div className="bg-white p-5 sm:p-6 dark:bg-[#171717]">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft sm:p-6 dark:border-neutral-800 dark:bg-[#171717]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <h2 className="max-w-xl text-3xl font-semibold leading-tight">
                 Know when the price actually moves.
@@ -224,11 +222,11 @@ export function HomePage() {
               </p>
             </div>
 
-            <div className="mt-6 grid gap-px border border-ink-200 bg-ink-200 md:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
               {watchedProducts.map((product) => (
                 <article
                   key={product.name}
-                  className="flex min-h-44 flex-col justify-between bg-white p-4 dark:bg-[#171717]"
+                  className="flex min-h-44 flex-col justify-between rounded-lg border border-ink-200 bg-white p-4 shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="min-w-0">
@@ -257,7 +255,7 @@ export function HomePage() {
             </div>
           </div>
 
-          <aside className="bg-ink-50 p-5 sm:p-6 dark:bg-neutral-900">
+          <aside className="rounded-lg border border-ink-200 bg-ink-50 p-5 shadow-soft sm:p-6 dark:border-neutral-800 dark:bg-neutral-900">
             <h3 className="text-lg font-semibold">Shared product history</h3>
             <p className="mt-3 text-sm leading-6 text-ink-600 dark:text-neutral-300">
               If a product was tracked once, later checks continue that same
@@ -276,7 +274,7 @@ export function HomePage() {
       </section>
 
       <section className="grid gap-8 py-12 xl:grid-cols-[420px_minmax(0,1fr)] xl:items-stretch">
-        <div className="border-y border-ink-200 bg-white p-5 sm:p-6 dark:border-neutral-800 dark:bg-[#171717]">
+        <div className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft sm:p-6 dark:border-neutral-800 dark:bg-[#171717]">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Bell className="h-4 w-4 text-moss-700 dark:text-moss-500" />
             pricehistory.md
@@ -297,11 +295,11 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="grid gap-px border-y border-ink-200 bg-ink-200 md:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
+        <div className="grid gap-4 md:grid-cols-3">
           {alertRows.map((row, index) => (
             <article
               key={row.title}
-              className="bg-white p-5 dark:bg-[#171717]"
+              className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
             >
               <div className="text-sm font-medium text-ink-500 dark:text-neutral-400">
                 {String(index + 1).padStart(2, "0")}
