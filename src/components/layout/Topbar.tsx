@@ -1,4 +1,11 @@
-import { Home, Moon, Search, ShoppingBag, Sun } from "lucide-react";
+import {
+  BarChart3,
+  Home,
+  Moon,
+  Search,
+  ShoppingBag,
+  Sun,
+} from "lucide-react";
 import { Link, NavLink } from "react-router-dom";
 import { useAppState } from "../../context/AppStateContext";
 
@@ -14,13 +21,22 @@ export function Topbar() {
   return (
     <header className="border-b border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 md:px-7">
-        <div className="flex min-w-0 items-center gap-4">
-          <Link to="/home" className="hidden min-w-0 sm:block">
-            <div className="truncate text-[15px] font-semibold">
-              Price History
-            </div>
-            <div className="truncate text-xs text-ink-500 dark:text-neutral-400">
-              Moldova stores
+        <div className="flex min-w-0 items-center gap-3 sm:gap-5">
+          <Link
+            to="/home"
+            className="flex min-w-0 items-center gap-2.5"
+            aria-label="PriceHistory.md home"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-ink-900 text-moss-500 shadow-soft dark:bg-neutral-950">
+              <BarChart3 className="h-5 w-5" />
+            </span>
+            <div className="hidden min-w-0 sm:block">
+              <div className="truncate text-[15px] font-semibold">
+                PriceHistory.md
+              </div>
+              <div className="truncate text-xs text-ink-500 dark:text-neutral-400">
+                Track Moldova store prices
+              </div>
             </div>
           </Link>
 
