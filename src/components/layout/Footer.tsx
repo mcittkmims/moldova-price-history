@@ -23,7 +23,7 @@ export function Footer() {
 
   return (
     <footer className="border-t border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-5 py-5 text-sm text-ink-600 md:px-7 dark:text-neutral-400">
+      <div className="flex w-full flex-col gap-4 px-4 py-5 text-sm text-ink-600 sm:px-6 lg:px-8 dark:text-neutral-400">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="font-medium text-ink-900 dark:text-neutral-100">

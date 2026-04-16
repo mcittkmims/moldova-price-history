@@ -20,7 +20,7 @@ export function Topbar() {
 
   return (
     <header className="border-b border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 md:px-7">
+      <div className="flex h-16 w-full items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
         <div className="flex min-w-0 items-center gap-3 sm:gap-5">
           <Link
             to="/home"
