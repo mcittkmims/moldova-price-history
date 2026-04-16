@@ -13,6 +13,8 @@ const watchedProducts = [
     oldPrice: "15,199 MDL",
     price: "13,999 MDL",
     drop: "-1,200 MDL",
+    imageTone: "#111827",
+    imageType: "phone",
   },
   {
     name: "AirPods Pro 2",
@@ -20,6 +22,8 @@ const watchedProducts = [
     oldPrice: "4,549 MDL",
     price: "4,199 MDL",
     drop: "-350 MDL",
+    imageTone: "#f8fafc",
+    imageType: "earbuds",
   },
   {
     name: "Samsung Galaxy A55",
@@ -27,6 +31,8 @@ const watchedProducts = [
     oldPrice: "7,299 MDL",
     price: "6,799 MDL",
     drop: "-500 MDL",
+    imageTone: "#f1f5f9",
+    imageType: "phone",
   },
 ];
 
@@ -53,6 +59,32 @@ const alertRows = [
     text: "When a watched product moves down from its recorded price, you can see the alert in the app and receive it by email.",
   },
 ];
+
+type ProductPreviewImageProps = {
+  name: string;
+  tone: string;
+  type: string;
+};
+
+function ProductPreviewImage({ name, tone, type }: ProductPreviewImageProps) {
+  return (
+    <div
+      className="grid h-24 place-items-center rounded-md border border-ink-200 dark:border-neutral-700"
+      style={{ backgroundColor: tone }}
+      role="img"
+      aria-label={`${name} product image`}
+    >
+      {type === "earbuds" ? (
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-5 rounded-full border border-ink-300 bg-white/80 dark:border-neutral-500" />
+          <div className="h-10 w-5 rounded-full border border-ink-300 bg-white/80 dark:border-neutral-500" />
+        </div>
+      ) : (
+        <div className="h-16 w-10 rounded-sm border border-white/70 bg-white/30" />
+      )}
+    </div>
+  );
+}
 
 export function HomePage() {
   return (
@@ -200,7 +232,13 @@ export function HomePage() {
                   key={product.name}
                   className="flex min-h-44 flex-col justify-between rounded-lg border border-ink-200 bg-white p-4 shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
                 >
-                  <div className="flex items-start justify-between gap-4">
+                  <ProductPreviewImage
+                    name={product.name}
+                    tone={product.imageTone}
+                    type={product.imageType}
+                  />
+
+                  <div className="mt-4 flex items-start justify-between gap-4">
                     <div className="min-w-0">
                       <div className="truncate font-medium">
                         {product.name}
