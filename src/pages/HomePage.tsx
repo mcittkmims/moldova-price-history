@@ -31,12 +31,12 @@ const watchedProducts = [
 ];
 
 const trackedStores = [
-  { name: "Darwin", mark: "D" },
-  { name: "Enter", mark: "E" },
-  { name: "Maximum", mark: "M" },
-  { name: "Xstore", mark: "X" },
-  { name: "Smart.md", mark: "S" },
-  { name: "Bomba", mark: "B" },
+  { name: "Darwin", mark: "D", tone: "#ecfdf5" },
+  { name: "Enter", mark: "E", tone: "#fff7ed" },
+  { name: "Maximum", mark: "M", tone: "#f8fafc" },
+  { name: "Xstore", mark: "X", tone: "#f1f5f9" },
+  { name: "Smart.md", mark: "S", tone: "#ecfdf5" },
+  { name: "Bomba", mark: "B", tone: "#fff7ed" },
 ];
 
 const alertRows = [
@@ -164,12 +164,15 @@ export function HomePage() {
                 {trackedStores.map((store) => (
                   <div
                     key={`${store.name}-${groupIndex}`}
-                    className="flex min-h-32 w-36 shrink-0 flex-col items-center justify-center rounded-lg border border-ink-200 bg-white px-5 py-5 text-center shadow-soft sm:w-44 xl:w-56 dark:border-neutral-800 dark:bg-[#171717]"
+                    className="grid min-h-28 w-28 shrink-0 place-items-center rounded-lg border border-ink-200 bg-white p-4 shadow-soft sm:w-32 xl:w-36 dark:border-neutral-800 dark:bg-[#171717]"
+                    aria-label={store.name}
                   >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-lg font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
+                    <div
+                      className="flex h-16 w-16 items-center justify-center rounded-md border border-ink-200 text-2xl font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
+                      style={{ backgroundColor: store.tone }}
+                    >
                       {store.mark}
                     </div>
-                    <div className="mt-3 text-sm font-medium">{store.name}</div>
                   </div>
                 ))}
               </div>
