@@ -165,15 +165,6 @@ export function HomePage() {
               </svg>
             </div>
 
-            <div className="mt-4 rounded-md border border-moss-100 bg-moss-50 p-3 text-sm text-moss-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100">
-              <div className="flex items-center gap-2 font-medium">
-                <Bell className="h-4 w-4" />
-                Price drop alert
-              </div>
-              <div className="mt-1 text-moss-700 dark:text-neutral-400">
-                Darwin dropped this watched product below its recent price.
-              </div>
-            </div>
           </div>
         </div>
       </section>
