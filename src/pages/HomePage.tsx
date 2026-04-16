@@ -30,26 +30,28 @@ const watchedProducts = [
   },
 ];
 
-const alertRows = [
-  {
-    title: "Watch a product once",
-    text: "Save it from search or from the product page.",
-  },
-  {
-    title: "Let the price record build",
-    text: "The tracked list keeps the latest price and previous price together.",
-  },
-  {
-    title: "See the drop when it matters",
-    text: "The alert copy tells you what changed and where it happened.",
-  },
+const trackedStores = [
+  { name: "Darwin", mark: "D", detail: "Phones, laptops, accessories" },
+  { name: "Enter", mark: "E", detail: "Electronics and home tech" },
+  { name: "Maximum", mark: "M", detail: "Consumer electronics" },
+  { name: "Xstore", mark: "X", detail: "Apple products and accessories" },
+  { name: "Smart.md", mark: "S", detail: "Phones and smart devices" },
+  { name: "Bomba", mark: "B", detail: "Appliances and electronics" },
 ];
 
-const comparisonRows = [
-  ["Store", "Current price", "Previous price", "Last checked"],
-  ["Darwin", "13,999 MDL", "15,199 MDL", "Today"],
-  ["XStore", "14,299 MDL", "14,799 MDL", "Yesterday"],
-  ["Enter", "14,499 MDL", "15,099 MDL", "2 days ago"],
+const alertRows = [
+  {
+    title: "Tracking starts once",
+    text: "When you or anyone else starts tracking a product, the app begins recording future price checks for that item.",
+  },
+  {
+    title: "Every later check adds context",
+    text: "The price history grows from that first tracked moment, so the record becomes more useful over time.",
+  },
+  {
+    title: "Drops become alerts",
+    text: "When a watched product moves down from its recorded price, the alert shows the store, old price, and new price.",
+  },
 ];
 
 export function HomePage() {
@@ -81,25 +83,15 @@ export function HomePage() {
             </Link>
           </div>
 
-          <div className="mt-10 grid max-w-xl gap-4 sm:grid-cols-3">
-            <div>
-              <div className="text-2xl font-semibold">3</div>
-              <div className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-                store views
-              </div>
+          <div className="mt-10 max-w-2xl border-y border-ink-200 py-4 dark:border-neutral-800">
+            <div className="text-sm font-medium">
+              Search all tracked stores from one place.
             </div>
-            <div>
-              <div className="text-2xl font-semibold">24h</div>
-              <div className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-                recent checks
-              </div>
-            </div>
-            <div>
-              <div className="text-2xl font-semibold">MDL</div>
-              <div className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-                local prices
-              </div>
-            </div>
+            <p className="mt-2 text-sm leading-6 text-ink-500 dark:text-neutral-400">
+              One search can surface products from Darwin, Enter, Maximum,
+              Xstore, Smart.md, Bomba, and other supported sources as they are
+              added.
+            </p>
           </div>
         </div>
 
@@ -168,11 +160,45 @@ export function HomePage() {
       <section className="grid gap-8 border-b border-ink-200 py-12 lg:grid-cols-[300px_1fr] dark:border-neutral-800">
         <div>
           <h2 className="text-3xl font-semibold leading-tight">
+            Stores people actually buy from.
+          </h2>
+          <p className="mt-4 text-base leading-7 text-ink-600 dark:text-neutral-300">
+            Store sources are visible, so each product has a clear origin
+            instead of looking like an anonymous listing.
+          </p>
+        </div>
+
+        <div className="grid gap-px overflow-hidden border-y border-ink-200 bg-ink-200 sm:grid-cols-2 xl:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
+          {trackedStores.map((store) => (
+            <div
+              key={store.name}
+              className="flex min-h-28 items-center gap-4 bg-white p-4 dark:bg-[#171717]"
+            >
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md border border-ink-200 bg-ink-50 text-lg font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100">
+                {store.mark}
+              </div>
+              <div className="min-w-0">
+                <div className="truncate text-lg font-semibold">
+                  {store.name}
+                </div>
+                <div className="mt-1 text-sm leading-6 text-ink-500 dark:text-neutral-400">
+                  {store.detail}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="grid gap-8 border-b border-ink-200 py-12 lg:grid-cols-[300px_1fr] dark:border-neutral-800">
+        <div>
+          <h2 className="text-3xl font-semibold leading-tight">
             Know when the price actually moves.
           </h2>
           <p className="mt-4 text-base leading-7 text-ink-600 dark:text-neutral-300">
-            The tracked list is for products you are seriously watching, not a
-            generic wishlist.
+            Tracked products are items with an active price record. If someone
+            already started tracking the same product, future checks continue
+            that record for everyone.
           </p>
         </div>
 
@@ -202,14 +228,15 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-8 border-b border-ink-200 py-12 lg:grid-cols-[minmax(0,1fr)_360px] dark:border-neutral-800">
+      <section className="grid gap-8 py-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
         <div>
           <h2 className="text-3xl font-semibold leading-tight">
-            Alerts without babysitting the store page.
+            Alerts start from tracked history.
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-7 text-ink-600 dark:text-neutral-300">
-            Save the product once. When the price drops, the app gives you the
-            context that matters: product, store, old price, and new price.
+            A product does not need to be tracked separately by every visitor.
+            Once tracking starts, later price checks build the same history and
+            make price-drop alerts possible.
           </p>
 
           <div className="mt-8 divide-y divide-ink-200 border-y border-ink-200 bg-white dark:divide-neutral-800 dark:border-neutral-800 dark:bg-[#171717]">
@@ -232,7 +259,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="self-start border-y border-ink-200 bg-white p-4 dark:border-neutral-800 dark:bg-[#171717]">
+        <div className="border-y border-ink-200 bg-white p-4 dark:border-neutral-800 dark:bg-[#171717]">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Bell className="h-4 w-4 text-moss-700 dark:text-moss-500" />
             pricehistory.md
@@ -251,38 +278,6 @@ export function HomePage() {
             Open tracked
             <ArrowRight className="h-4 w-4" />
           </Link>
-        </div>
-      </section>
-
-      <section className="grid gap-8 py-12 lg:grid-cols-[300px_1fr]">
-        <div>
-          <h2 className="text-3xl font-semibold leading-tight">
-            Compare the record, not the sale label.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-ink-600 dark:text-neutral-300">
-            Store labels can be noisy. A price record makes the change easier
-            to trust.
-          </p>
-        </div>
-
-        <div className="overflow-hidden border-y border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
-          <div className="min-w-[620px] divide-y divide-ink-200 dark:divide-neutral-800">
-            {comparisonRows.map((row, index) => (
-              <div
-                key={row.join("-")}
-                className={[
-                  "grid grid-cols-4 gap-4 px-4 py-3 text-sm",
-                  index === 0
-                    ? "font-medium text-ink-900 dark:text-neutral-100"
-                    : "text-ink-500 dark:text-neutral-400",
-                ].join(" ")}
-              >
-                {row.map((cell) => (
-                  <div key={cell}>{cell}</div>
-                ))}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
     </div>
