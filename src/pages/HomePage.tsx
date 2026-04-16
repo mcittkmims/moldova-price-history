@@ -56,8 +56,8 @@ const alertRows = [
 
 export function HomePage() {
   return (
-    <div className="pb-12">
-      <section className="grid min-h-[calc(100vh-10rem)] gap-10 border-b border-ink-200 py-10 lg:grid-cols-[minmax(0,1fr)_460px] lg:items-center dark:border-neutral-800">
+    <div className="mx-auto w-full max-w-[1500px] pb-12">
+      <section className="grid min-h-[calc(100vh-10rem)] gap-8 border-b border-ink-200 py-10 xl:grid-cols-[minmax(480px,680px)_minmax(380px,460px)] xl:items-center xl:justify-between dark:border-neutral-800">
         <div className="max-w-3xl">
           <h1 className="max-w-2xl text-5xl font-semibold leading-[1.05] tracking-normal sm:text-6xl">
             pricehistory.md
@@ -81,17 +81,6 @@ export function HomePage() {
             >
               View tracked products
             </Link>
-          </div>
-
-          <div className="mt-10 max-w-2xl border-y border-ink-200 py-4 dark:border-neutral-800">
-            <div className="text-sm font-medium">
-              Search all tracked stores from one place.
-            </div>
-            <p className="mt-2 text-sm leading-6 text-ink-500 dark:text-neutral-400">
-              One search can surface products from Darwin, Enter, Maximum,
-              Xstore, Smart.md, Bomba, and other supported sources as they are
-              added.
-            </p>
           </div>
         </div>
 
@@ -157,7 +146,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-8 border-b border-ink-200 py-12 lg:grid-cols-[300px_1fr] dark:border-neutral-800">
+      <section className="grid gap-8 border-b border-ink-200 py-12 xl:grid-cols-[320px_minmax(0,1fr)] dark:border-neutral-800">
         <div>
           <h2 className="text-3xl font-semibold leading-tight">
             Stores people actually buy from.
@@ -168,7 +157,7 @@ export function HomePage() {
           </p>
         </div>
 
-        <div className="grid gap-px overflow-hidden border-y border-ink-200 bg-ink-200 sm:grid-cols-2 xl:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
+        <div className="grid max-w-5xl gap-px overflow-hidden border-y border-ink-200 bg-ink-200 sm:grid-cols-2 xl:grid-cols-3 dark:border-neutral-800 dark:bg-neutral-800">
           {trackedStores.map((store) => (
             <div
               key={store.name}
@@ -190,7 +179,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-8 border-b border-ink-200 py-12 lg:grid-cols-[300px_1fr] dark:border-neutral-800">
+      <section className="grid gap-8 border-b border-ink-200 py-12 xl:grid-cols-[320px_minmax(0,820px)] dark:border-neutral-800">
         <div>
           <h2 className="text-3xl font-semibold leading-tight">
             Know when the price actually moves.
@@ -228,7 +217,7 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-8 py-12 lg:grid-cols-[minmax(0,1fr)_420px] lg:items-center">
+      <section className="grid gap-8 py-12 xl:grid-cols-[minmax(0,720px)_420px] xl:items-center xl:justify-between">
         <div>
           <h2 className="text-3xl font-semibold leading-tight">
             Alerts start from tracked history.
