@@ -1,11 +1,4 @@
 import { Github, Linkedin, Mail } from "lucide-react";
-import { Link } from "react-router-dom";
-
-const footerLinks = [
-  { to: "/home", label: "Overview" },
-  { to: "/search", label: "Search" },
-  { to: "/tracked", label: "Tracked" },
-];
 
 const contactLinks = [
   {
@@ -34,10 +27,10 @@ export function Footer() {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="font-medium text-ink-900 dark:text-neutral-100">
-              PriceHistory.md
+              pricehistory.md
             </div>
             <div className="mt-1 text-xs">
-              Copyright {year} PriceHistory.md. All rights reserved.
+              Copyright {year} pricehistory.md. All rights reserved.
             </div>
           </div>
 
@@ -54,24 +47,6 @@ export function Footer() {
             ))}
           </div>
         </div>
-
-        <nav className="flex flex-wrap items-center gap-3 border-t border-ink-200 pt-4 text-xs dark:border-neutral-800">
-          {footerLinks.map((link) => (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="transition-colors hover:text-ink-900 dark:hover:text-neutral-100"
-            >
-              {link.label}
-            </Link>
-          ))}
-          <a
-            href="https://pricehistory.md"
-            className="transition-colors hover:text-ink-900 dark:hover:text-neutral-100"
-          >
-            pricehistory.md
-          </a>
-        </nav>
       </div>
     </footer>
   );
