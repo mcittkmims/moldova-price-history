@@ -45,6 +45,8 @@ const trackedStores = [
   { name: "Bomba", mark: "B", tone: "#fff7ed" },
 ];
 
+const storeCarouselGroups = Array.from({ length: 4 }, (_, index) => index);
+
 const alertRows = [
   {
     title: "Start tracking once",
@@ -176,13 +178,13 @@ export function HomePage() {
           </h2>
         </div>
 
-        <div className="overflow-hidden" aria-label="Tracked store sources">
+        <div className="-mx-2 overflow-hidden px-2 py-2" aria-label="Tracked store sources">
           <div className="store-carousel-track flex w-max">
-            {[0, 1].map((groupIndex) => (
+            {storeCarouselGroups.map((groupIndex) => (
               <div
                 key={groupIndex}
                 className="flex gap-4 pr-4"
-                aria-hidden={groupIndex === 1}
+                aria-hidden={groupIndex > 0}
               >
                 {trackedStores.map((store) => (
                   <div
