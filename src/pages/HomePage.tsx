@@ -91,9 +91,9 @@ function ProductPreviewImage({ name, tone, type }: ProductPreviewImageProps) {
 export function HomePage() {
   return (
     <div className="mx-auto w-full max-w-[1500px] pb-12">
-      <section className="grid min-h-[calc(100vh-10rem)] gap-8 border-b border-ink-200 py-10 xl:grid-cols-[minmax(480px,680px)_minmax(380px,460px)] xl:items-center xl:justify-between dark:border-neutral-800">
-        <div className="max-w-3xl">
-          <h1 className="max-w-2xl text-5xl font-semibold leading-[1.05] tracking-normal sm:text-6xl">
+      <section className="grid min-h-[calc(100vh-10rem)] grid-cols-[minmax(0,1fr)] content-center justify-items-center gap-8 border-b border-ink-200 py-10 xl:grid-cols-[minmax(480px,680px)_minmax(380px,460px)] xl:items-center xl:justify-items-stretch xl:justify-between dark:border-neutral-800">
+        <div className="min-w-0 w-full max-w-3xl">
+          <h1 className="max-w-2xl break-words text-4xl font-semibold leading-[1.05] tracking-normal min-[380px]:text-5xl sm:text-6xl">
             pricehistory.md
           </h1>
           <p className="mt-6 max-w-2xl text-xl leading-8 text-ink-600 dark:text-neutral-300">
@@ -118,7 +118,7 @@ export function HomePage() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-lg border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
+        <div className="min-w-0 w-full max-w-[460px] overflow-hidden rounded-lg border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
           <div className="border-b border-ink-200 p-4 dark:border-neutral-800">
             <div className="flex items-center gap-2 rounded-md border border-ink-200 bg-ink-50 px-3 py-2 text-sm text-ink-500 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-400">
               <Search className="h-4 w-4" />
