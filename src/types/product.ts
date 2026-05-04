@@ -1,20 +1,27 @@
 export type ThemeMode = "light" | "dark";
 
-export type ProductCategory =
-  | "Phones"
-  | "Laptops"
-  | "Home"
-  | "Audio"
-  | "Appliances"
-  | "Gaming";
+export type ProductCategory = string;
 
-export type StoreName =
-  | "Darwin"
-  | "Enter"
-  | "Maximum"
-  | "Xstore"
-  | "Smart.md"
-  | "Bomba";
+export type ProductCategoryOption = {
+  id: string;
+  name: string;
+};
+
+export type StoreId = string;
+
+export type StoreOption = {
+  id: StoreId;
+  name: string;
+  logoPath: string;
+  faviconPath: string;
+};
+
+export type StoreName = string;
+
+export type SortOption = {
+  id: ProductSort;
+  name: string;
+};
 
 export type PricePoint = {
   date: string;
@@ -24,15 +31,17 @@ export type PricePoint = {
 export type Product = {
   id: string;
   title: string;
+  storeId?: StoreId;
   store: StoreName;
   category: ProductCategory;
   currentPrice: number;
   previousPrice: number;
   currency: "MDL";
   rating: number;
-  availability: "In stock" | "Low stock" | "Preorder";
+  availability: "In stock" | "Low stock" | "Preorder" | "Out of stock";
   url: string;
   imageTone: string;
+  imageUrl?: string | null;
   specs: string[];
   history: PricePoint[];
   lastChecked: string;
@@ -40,8 +49,12 @@ export type Product = {
 
 export type ProductFilters = {
   query: string;
-  store: "All" | StoreName;
+  store: "All" | StoreId;
   category: "All" | ProductCategory;
 };
 
-export type ProductSort = "relevance" | "price-low" | "price-high" | "drop";
+export type ProductSort =
+  | "default"
+  | "price_asc"
+  | "price_desc"
+  | "popularity";

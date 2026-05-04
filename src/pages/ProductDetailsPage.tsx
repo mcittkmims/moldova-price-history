@@ -2,6 +2,9 @@ import { ExternalLink, ShoppingBag } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { PriceHistoryChart } from "../components/charts/PriceHistoryChart";
+import { AvailabilityBadge } from "../components/products/AvailabilityBadge";
+import { ProductImage } from "../components/products/ProductImage";
+import { StoreMark } from "../components/products/StoreMark";
 import { useAppState } from "../context/AppStateContext";
 import { productService } from "../services/productService";
 import type { Product } from "../types/product";
@@ -76,9 +79,9 @@ export function ProductDetailsPage() {
             {product.title}
           </h1>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
-            <div>{product.store}</div>
+            <StoreMark product={product} />
             <div>{product.category}</div>
-            <div>{product.availability}</div>
+            <AvailabilityBadge availability={product.availability} />
           </div>
         </div>
 
@@ -110,12 +113,12 @@ export function ProductDetailsPage() {
 
       <div className="grid gap-5 xl:grid-cols-[360px_minmax(0,1fr)]">
         <section className="min-w-0 overflow-hidden rounded-lg border border-ink-200 bg-white p-4 shadow-soft sm:p-5 dark:border-neutral-800 dark:bg-[#171717]">
-          <div
-            className="mb-5 grid h-36 place-items-center rounded-md border border-ink-200 dark:border-neutral-700"
-            style={{ backgroundColor: product.imageTone }}
-          >
-            <div className="h-20 w-14 rounded-sm border border-white/70 bg-white/30" />
-          </div>
+          <ProductImage
+            product={product}
+            className="mb-5 grid h-36 place-items-center overflow-hidden rounded-md border border-ink-200 bg-white dark:border-neutral-700"
+            imageClassName="h-full w-full object-contain p-4"
+            placeholderClassName="h-20 w-14 rounded-sm border border-ink-200 bg-ink-50"
+          />
 
           <div className="space-y-4">
             <div>

@@ -1,18 +1,21 @@
 import { Search } from "lucide-react";
 import type {
-  ProductCategory,
+  ProductCategoryOption,
   ProductFilters,
+  SortOption,
   ProductSort,
-  StoreName,
+  StoreOption,
 } from "../../types/product";
 
 type SearchControlsProps = {
   filters: ProductFilters;
   sort: ProductSort;
-  stores: StoreName[];
-  categories: ProductCategory[];
+  stores: StoreOption[];
+  categories: ProductCategoryOption[];
+  sortOptions: SortOption[];
   onFiltersChange: (filters: ProductFilters) => void;
   onSortChange: (sort: ProductSort) => void;
+  onSearch: () => void;
 };
 
 export function SearchControls({
@@ -20,11 +23,19 @@ export function SearchControls({
   sort,
   stores,
   categories,
+  sortOptions,
   onFiltersChange,
   onSortChange,
+  onSearch,
 }: SearchControlsProps) {
   return (
-    <section className="rounded-lg border border-ink-200 bg-white p-4 shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
+    <form
+      className="rounded-lg border border-ink-200 bg-white p-4 shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
+      onSubmit={(event) => {
+        event.preventDefault();
+        onSearch();
+      }}
+    >
       <div className="grid gap-4 lg:grid-cols-[1fr_180px_180px_170px]">
         <label className="block">
           <div className="mb-2 text-sm font-medium">Search</div>
@@ -55,8 +66,8 @@ export function SearchControls({
           >
             <option value="All">All stores</option>
             {stores.map((store) => (
-              <option key={store} value={store}>
-                {store}
+              <option key={store.id} value={store.id}>
+                {store.name}
               </option>
             ))}
           </select>
@@ -76,8 +87,8 @@ export function SearchControls({
           >
             <option value="All">All categories</option>
             {categories.map((category) => (
-              <option key={category} value={category}>
-                {category}
+              <option key={category.id} value={category.id}>
+                {category.name}
               </option>
             ))}
           </select>
@@ -90,13 +101,14 @@ export function SearchControls({
             onChange={(event) => onSortChange(event.target.value as ProductSort)}
             className="h-10 w-full rounded-md border border-ink-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-[#1a1a1a]"
           >
-            <option value="relevance">Relevance</option>
-            <option value="price-low">Lowest price</option>
-            <option value="price-high">Highest price</option>
-            <option value="drop">Biggest drop</option>
+            {sortOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.name}
+              </option>
+            ))}
           </select>
         </label>
       </div>
-    </section>
+    </form>
   );
 }
