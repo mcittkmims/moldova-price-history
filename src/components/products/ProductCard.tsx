@@ -73,7 +73,7 @@ export function ProductCard({
             </button>
           </div>
 
-          <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+          <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
             {product.availability === "Out of stock" ? (
               <div className="min-w-0">
                 <div className="truncate text-lg font-semibold sm:text-xl text-ink-400 dark:text-neutral-500">
@@ -115,7 +115,7 @@ export function ProductCard({
           </div>
 
           {!compact ? (
-            <div className="mt-4 grid min-w-0 grid-cols-2 gap-2 border-t border-ink-200 pt-3 text-xs text-ink-500 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:text-sm dark:border-neutral-800 dark:text-neutral-400">
+            <div className="mt-4 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-ink-200 pt-3 text-xs text-ink-500 sm:gap-3 sm:text-sm dark:border-neutral-800 dark:text-neutral-400">
               <div className="min-w-0">
                 <AvailabilityBadge availability={product.availability} />
               </div>
@@ -128,7 +128,7 @@ export function ProductCard({
                 rel="noreferrer"
                 className="col-span-2 inline-flex min-w-0 items-center gap-1 hover:text-moss-700 sm:col-span-1 dark:hover:text-moss-500"
               >
-                <span className="truncate">Store page</span>
+                <span className="min-w-0 truncate">Store page</span>
                 <ExternalLink className="h-3.5 w-3.5" />
               </a>
             </div>
