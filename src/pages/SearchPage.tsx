@@ -203,7 +203,7 @@ export function SearchPage() {
   };
 
   return (
-    <div className="mx-auto w-full max-w-[1500px] space-y-5">
+    <div className="mx-auto w-full min-w-0 max-w-[1500px] space-y-5 overflow-hidden">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-2xl font-semibold tracking-normal">Search</h1>
@@ -244,7 +244,7 @@ export function SearchPage() {
           {products.map((product, index) => {
             const isLast = index === products.length - 1;
             return (
-              <div key={product.id} ref={isLast ? lastElementRef : null}>
+              <div key={product.id} ref={isLast ? lastElementRef : null} className="min-w-0 overflow-hidden">
                 <ProductCard
                   product={product}
                   tracked={isTracked(product.id)}
