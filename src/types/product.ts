@@ -37,7 +37,7 @@ export type Product = {
   currentPrice: number;
   previousPrice: number;
   currency: "MDL";
-  rating: number;
+
   availability: "In stock" | "Low stock" | "Preorder" | "Out of stock";
   url: string;
   imageTone: string;

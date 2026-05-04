@@ -1,4 +1,4 @@
-import { ExternalLink, Star, Trash2 } from "lucide-react";
+import { ExternalLink, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import { ProductImage } from "./ProductImage";
@@ -54,10 +54,7 @@ export function ProductCard({
               <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
                 <StoreMark product={product} />
                 <div>{product.category}</div>
-                <div className="inline-flex items-center gap-1">
-                  <Star className="h-3.5 w-3.5 fill-rust-500 text-rust-500" />
-                  {product.rating}
-                </div>
+
               </div>
             </div>
 
@@ -77,31 +74,41 @@ export function ProductCard({
           </div>
 
           <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            <div className="min-w-0">
-              <div className="truncate text-lg font-semibold sm:text-xl">
-                {formatMdl(product.currentPrice)}
+            {product.availability === "Out of stock" ? (
+              <div className="min-w-0">
+                <div className="truncate text-sm font-medium text-ink-400 dark:text-neutral-500">
+                  Unavailable
+                </div>
               </div>
-              <div className="mt-1 truncate text-xs text-ink-500 sm:text-sm dark:text-neutral-400">
-                Previous {formatMdl(product.previousPrice)}
-              </div>
-            </div>
+            ) : (
+              <>
+                <div className="min-w-0">
+                  <div className="truncate text-lg font-semibold sm:text-xl">
+                    {formatMdl(product.currentPrice)}
+                  </div>
+                  <div className="mt-1 truncate text-xs text-ink-500 sm:text-sm dark:text-neutral-400">
+                    Previous {formatMdl(product.previousPrice)}
+                  </div>
+                </div>
 
-            <div className="min-w-0 text-xs sm:text-right sm:text-sm">
-              <div
-                className={
-                  isLower
-                    ? "font-medium text-moss-700 dark:text-moss-500"
-                    : "font-medium text-rust-700 dark:text-rust-500"
-                }
-              >
-                {isLower
-                  ? `${formatMdl(drop)} lower`
-                  : `${formatMdl(Math.abs(drop))} higher`}
-              </div>
-              <div className="mt-1 text-ink-500 dark:text-neutral-400">
-                {isLower ? getPriceDropPercent(product) : 0}% since last price
-              </div>
-            </div>
+                <div className="min-w-0 text-xs sm:text-right sm:text-sm">
+                  <div
+                    className={
+                      isLower
+                        ? "font-medium text-moss-700 dark:text-moss-500"
+                        : "font-medium text-rust-700 dark:text-rust-500"
+                    }
+                  >
+                    {isLower
+                      ? `${formatMdl(drop)} lower`
+                      : `${formatMdl(Math.abs(drop))} higher`}
+                  </div>
+                  <div className="mt-1 text-ink-500 dark:text-neutral-400">
+                    {isLower ? getPriceDropPercent(product) : 0}% since last price
+                  </div>
+                </div>
+              </>
+            )}
           </div>
 
           {!compact ? (

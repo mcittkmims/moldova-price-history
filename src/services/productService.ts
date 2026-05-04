@@ -129,8 +129,45 @@ const searchMockProducts = (filters: ProductFilters, sort: ProductSort) => {
   return applySort(products, sort);
 };
 
+const PER_STORE_PAGE_SIZE = 4;
+
 export const productService = {
-  async searchProducts(filters: ProductFilters, sort: ProductSort) {
+  /** Fetch a single store's products for one page. Used by the progressive parallel loader. */
+  async searchProductsForStore(
+    filters: ProductFilters,
+    sort: ProductSort,
+    page: number,
+    storeId: string,
+  ) {
+    const query = filters.query.trim();
+    if (!query) return [];
+
+    const params = new URLSearchParams({
+      q: query,
+      page: String(page),
+      page_size: String(PER_STORE_PAGE_SIZE),
+      stores: storeId,
+    });
+    if (sort !== "default") params.set("sort", sort);
+    if (filters.category !== "All") params.set("category", filters.category);
+
+    try {
+      const products = await fetchJson<Product[]>("/products/search", params);
+      const normalized = products.map(normalizeProduct);
+      normalized.forEach((p) => liveProductsById.set(p.id, p));
+      return normalized;
+    } catch (error) {
+      console.error(`[${storeId}] search failed`, error);
+      // Graceful fallback: filter mock data for this store
+      const allMocks = searchMockProducts(
+        { ...filters, store: storeId },
+        sort,
+      );
+      return allMocks.slice((page - 1) * PER_STORE_PAGE_SIZE, page * PER_STORE_PAGE_SIZE);
+    }
+  },
+
+  async searchProducts(filters: ProductFilters, sort: ProductSort, page: number = 1) {
     const query = filters.query.trim();
 
     if (!query) {
@@ -139,7 +176,7 @@ export const productService = {
 
     const params = new URLSearchParams({
       q: query,
-      page: "1",
+      page: String(page),
       page_size: "24",
     });
     if (sort !== "default") {
@@ -159,7 +196,8 @@ export const productService = {
       return normalizedProducts;
     } catch (error) {
       console.error(error);
-      return searchMockProducts(filters, sort);
+      const allMocks = searchMockProducts(filters, sort);
+      return allMocks.slice((page - 1) * 24, page * 24);
     }
   },
 
