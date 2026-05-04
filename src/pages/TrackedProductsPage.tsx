@@ -3,29 +3,38 @@ import { useEffect, useMemo, useState } from "react";
 import { DistributionChart } from "../components/charts/DistributionChart";
 import { ProductCard } from "../components/products/ProductCard";
 import { useAppState } from "../context/AppStateContext";
-import { categories, productService, stores } from "../services/productService";
+import { categories, productService, sortOptions, stores } from "../services/productService";
 import type {
   Product,
+  ProductCategoryOption,
   ProductCategory,
+  SortOption,
   ProductSort,
+  StoreId,
+  StoreOption,
   StoreName,
 } from "../types/product";
 import { formatMdl, getPriceDrop, getTrackedStats } from "../utils/pricing";
 
 type TrackedFilter = {
-  store: "All" | StoreName;
+  store: "All" | StoreId;
   category: "All" | ProductCategory;
 };
 
 export function TrackedProductsPage() {
   const { trackedIds, isTracked, toggleTracked } = useAppState();
   const [products, setProducts] = useState<Product[]>([]);
+  const [categoryOptions, setCategoryOptions] =
+    useState<ProductCategoryOption[]>(categories);
+  const [storeOptions, setStoreOptions] = useState<StoreOption[]>(stores);
+  const [trackedSortOptions, setTrackedSortOptions] =
+    useState<SortOption[]>(sortOptions);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<TrackedFilter>({
     store: "All",
     category: "All",
   });
-  const [sort, setSort] = useState<ProductSort>("drop");
+  const [sort, setSort] = useState<ProductSort>("default");
   const [distribution, setDistribution] = useState<"store" | "category">(
     "store",
   );
@@ -46,45 +55,78 @@ export function TrackedProductsPage() {
     };
   }, [trackedIds]);
 
+  useEffect(() => {
+    let active = true;
+    Promise.all([
+      productService.getCategories(),
+      productService.getStores(),
+      productService.getSortOptions(),
+    ]).then(([nextCategories, nextStores, nextSortOptions]) => {
+      if (active) {
+        setCategoryOptions(nextCategories);
+        setStoreOptions(nextStores);
+        setTrackedSortOptions(nextSortOptions);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const visibleProducts = useMemo(() => {
+    const comparePrice = (a: Product, b: Product, ascending: boolean) => {
+      const aPriced = a.currentPrice > 0;
+      const bPriced = b.currentPrice > 0;
+      if (aPriced !== bPriced) {
+        return aPriced ? -1 : 1;
+      }
+      return ascending
+        ? a.currentPrice - b.currentPrice
+        : b.currentPrice - a.currentPrice;
+    };
     const filtered = products.filter((product) => {
-      const matchesStore = filter.store === "All" || product.store === filter.store;
+      const matchesStore =
+        filter.store === "All" ||
+        product.storeId === filter.store ||
+        product.store === filter.store;
+      const category = categoryOptions.find((item) => item.id === filter.category);
       const matchesCategory =
-        filter.category === "All" || product.category === filter.category;
+        filter.category === "All" ||
+        product.category === filter.category ||
+        product.category === category?.name;
 
       return matchesStore && matchesCategory;
     });
 
-    if (sort === "price-low") {
-      return [...filtered].sort((a, b) => a.currentPrice - b.currentPrice);
+    if (sort === "price_asc") {
+      return [...filtered].sort((a, b) => comparePrice(a, b, true));
     }
 
-    if (sort === "price-high") {
-      return [...filtered].sort((a, b) => b.currentPrice - a.currentPrice);
-    }
-
-    if (sort === "drop") {
-      return [...filtered].sort((a, b) => getPriceDrop(b) - getPriceDrop(a));
+    if (sort === "price_desc") {
+      return [...filtered].sort((a, b) => comparePrice(a, b, false));
     }
 
     return filtered;
-  }, [filter, products, sort]);
+  }, [categoryOptions, filter, products, sort]);
 
   const stats = useMemo(() => getTrackedStats(products), [products]);
 
   const distributionData = useMemo(() => {
-    const source = distribution === "store" ? stores : categories;
+      const source =
+      distribution === "store"
+        ? storeOptions
+        : categoryOptions;
     return source
-      .map((name) => ({
-        name,
+      .map((item: ProductCategoryOption) => ({
+        name: item.name,
         count: products.filter((product) =>
           distribution === "store"
-            ? product.store === name
-            : product.category === name,
+            ? product.storeId === item.id || product.store === item.name
+            : product.category === item.id || product.category === item.name,
         ).length,
       }))
       .filter((item) => item.count > 0);
-  }, [distribution, products]);
+  }, [categoryOptions, distribution, products, storeOptions]);
 
   return (
     <div className="mx-auto w-full max-w-[1500px] space-y-5">
@@ -195,9 +237,9 @@ export function TrackedProductsPage() {
               className="h-10 w-full rounded-md border border-ink-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-[#1a1a1a]"
             >
               <option value="All">All stores</option>
-              {stores.map((store) => (
-                <option key={store} value={store}>
-                  {store}
+              {storeOptions.map((store) => (
+                <option key={store.id} value={store.id}>
+                  {store.name}
                 </option>
               ))}
             </select>
@@ -215,9 +257,9 @@ export function TrackedProductsPage() {
               className="h-10 w-full rounded-md border border-ink-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-[#1a1a1a]"
             >
               <option value="All">All categories</option>
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
+              {categoryOptions.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
                 </option>
               ))}
             </select>
@@ -229,10 +271,11 @@ export function TrackedProductsPage() {
               onChange={(event) => setSort(event.target.value as ProductSort)}
               className="h-10 w-full rounded-md border border-ink-300 bg-white px-3 text-sm dark:border-neutral-700 dark:bg-[#1a1a1a]"
             >
-              <option value="drop">Biggest drop</option>
-              <option value="price-low">Lowest price</option>
-              <option value="price-high">Highest price</option>
-              <option value="relevance">Saved order</option>
+              {trackedSortOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
             </select>
           </label>
         </div>

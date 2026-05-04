@@ -1,5 +1,8 @@
 import { ExternalLink, Star, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { AvailabilityBadge } from "./AvailabilityBadge";
+import { ProductImage } from "./ProductImage";
+import { StoreMark } from "./StoreMark";
 import type { Product } from "../../types/product";
 import {
   formatDate,
@@ -29,11 +32,14 @@ export function ProductCard({
       <div className="flex min-w-0 gap-3 sm:gap-4">
         <Link
           to={`/products/${product.id}`}
-          className="grid h-14 w-14 shrink-0 place-items-center rounded-md border border-ink-200 sm:h-20 sm:w-20 dark:border-neutral-700"
-          style={{ backgroundColor: product.imageTone }}
+          className="block h-14 w-14 shrink-0 sm:h-20 sm:w-20"
           aria-label={`Open ${product.title}`}
         >
-          <div className="h-8 w-5 rounded-sm border border-white/70 bg-white/30 sm:h-10 sm:w-7" />
+          <ProductImage
+            product={product}
+            className="grid h-full w-full place-items-center overflow-hidden rounded-md border border-ink-200 bg-white dark:border-neutral-700"
+            placeholderClassName="h-8 w-5 rounded-sm border border-ink-200 bg-ink-50 sm:h-10 sm:w-7"
+          />
         </Link>
 
         <div className="min-w-0 flex-1 overflow-hidden">
@@ -46,7 +52,7 @@ export function ProductCard({
                 {product.title}
               </Link>
               <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
-                <div>{product.store}</div>
+                <StoreMark product={product} />
                 <div>{product.category}</div>
                 <div className="inline-flex items-center gap-1">
                   <Star className="h-3.5 w-3.5 fill-rust-500 text-rust-500" />
@@ -100,7 +106,9 @@ export function ProductCard({
 
           {!compact ? (
             <div className="mt-4 grid min-w-0 grid-cols-2 gap-2 border-t border-ink-200 pt-3 text-xs text-ink-500 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-3 sm:text-sm dark:border-neutral-800 dark:text-neutral-400">
-              <div className="min-w-0 truncate">{product.availability}</div>
+              <div className="min-w-0">
+                <AvailabilityBadge availability={product.availability} />
+              </div>
               <div className="min-w-0 truncate text-right sm:text-left">
                 Checked {formatDate(product.lastChecked)}
               </div>

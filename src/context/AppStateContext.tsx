@@ -30,11 +30,11 @@ export function AppStateProvider({ children }: PropsWithChildren) {
   );
   const [trackedIds, setTrackedIds] = useLocalStorage<string[]>(
     "mph-tracked-products",
-    ["darwin-iphone-15-128", "xstore-airpods-pro-2"],
+    ["darwin-iphone-15-128", "ultra-airpods-pro-2"],
   );
   const [defaultSort, setDefaultSort] = useLocalStorage<ProductSort>(
     "mph-default-sort",
-    "relevance",
+    "default",
   );
 
   useEffect(() => {
