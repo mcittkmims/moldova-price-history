@@ -18,7 +18,7 @@ const watchedProducts = [
   },
   {
     name: "AirPods Pro 2",
-    store: "XStore",
+    store: "Ultra",
     oldPrice: "4,549 MDL",
     price: "4,199 MDL",
     drop: "-350 MDL",
@@ -37,12 +37,11 @@ const watchedProducts = [
 ];
 
 const trackedStores = [
-  { name: "Darwin", mark: "D", tone: "#ecfdf5" },
-  { name: "Enter", mark: "E", tone: "#fff7ed" },
-  { name: "Maximum", mark: "M", tone: "#f8fafc" },
-  { name: "Xstore", mark: "X", tone: "#f1f5f9" },
-  { name: "Smart.md", mark: "S", tone: "#ecfdf5" },
-  { name: "Bomba", mark: "B", tone: "#fff7ed" },
+  { name: "Darwin", logoPath: "/store-logos/darwin.png" },
+  { name: "Enter", logoPath: "/store-logos/enter.png" },
+  { name: "Maximum", logoPath: "/store-logos/maximum.png" },
+  { name: "Smart.md", logoPath: "/store-logos/smart.png" },
+  { name: "Bomba", logoPath: "/store-logos/bomba.png" },
 ];
 
 const storeCarouselGroups = Array.from({ length: 4 }, (_, index) => index);
@@ -189,15 +188,10 @@ export function HomePage() {
                 {trackedStores.map((store) => (
                   <div
                     key={`${store.name}-${groupIndex}`}
-                    className="grid min-h-28 w-28 shrink-0 place-items-center rounded-lg border border-ink-200 bg-white p-4 shadow-soft sm:w-32 xl:w-36 dark:border-neutral-800 dark:bg-[#171717]"
+                    className="flex min-h-28 w-28 shrink-0 items-center justify-center rounded-lg border border-ink-200 bg-white p-4 shadow-soft sm:w-32 xl:w-36 dark:border-neutral-800 dark:bg-[#171717]"
                     aria-label={store.name}
                   >
-                    <div
-                      className="flex h-16 w-16 items-center justify-center rounded-md border border-ink-200 text-2xl font-semibold text-ink-900 dark:border-neutral-800 dark:bg-neutral-900 dark:text-neutral-100"
-                      style={{ backgroundColor: store.tone }}
-                    >
-                      {store.mark}
-                    </div>
+                    <img src={store.logoPath} alt={`${store.name} logo`} className="h-full w-full object-contain" />
                   </div>
                 ))}
               </div>
@@ -285,7 +279,7 @@ export function HomePage() {
             AirPods Pro 2 dropped by 350 MDL.
           </div>
           <p className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
-            XStore now lists this watched product at 4,199 MDL. Previous
+            Ultra now lists this watched product at 4,199 MDL. Previous
             recorded price: 4,549 MDL.
           </p>
 
