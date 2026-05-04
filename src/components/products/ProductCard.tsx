@@ -76,8 +76,11 @@ export function ProductCard({
           <div className="mt-4 grid min-w-0 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
             {product.availability === "Out of stock" ? (
               <div className="min-w-0">
-                <div className="truncate text-sm font-medium text-ink-400 dark:text-neutral-500">
+                <div className="truncate text-lg font-semibold sm:text-xl text-ink-400 dark:text-neutral-500">
                   Unavailable
+                </div>
+                <div className="mt-1 truncate text-xs sm:text-sm invisible select-none">
+                  &nbsp;
                 </div>
               </div>
             ) : (
