@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import { ProductImage } from "./ProductImage";
@@ -13,15 +13,11 @@ import {
 
 type ProductCardProps = {
   product: Product;
-  tracked: boolean;
-  onToggleTracked: (productId: string) => void;
   compact?: boolean;
 };
 
 export function ProductCard({
   product,
-  tracked,
-  onToggleTracked,
   compact = false,
 }: ProductCardProps) {
   const drop = getPriceDrop(product);
@@ -43,34 +39,17 @@ export function ProductCard({
         </Link>
 
         <div className="min-w-0 flex-1 overflow-hidden">
-          <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
-            <div className="min-w-0 flex-1">
-              <Link
-                to={`/products/${product.id}`}
-                className="block truncate text-[15px] font-semibold hover:text-moss-700 dark:hover:text-moss-500"
-              >
-                {product.title}
-              </Link>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
-                <StoreMark product={product} />
-                <div>{product.category}</div>
-
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onToggleTracked(product.id)}
-              className={[
-                "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors sm:h-9 sm:gap-2 sm:px-3 sm:text-sm",
-                tracked
-                  ? "border-ink-300 bg-ink-50 text-ink-800 hover:bg-ink-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
-                  : "border-moss-700 bg-moss-700 text-white hover:bg-moss-900 dark:border-moss-600 dark:bg-moss-600 dark:hover:bg-moss-700",
-              ].join(" ")}
+          <div className="min-w-0 flex-1">
+            <Link
+              to={`/products/${product.id}`}
+              className="block truncate text-[15px] font-semibold hover:text-moss-700 dark:hover:text-moss-500"
             >
-              {compact && tracked ? <Trash2 className="h-4 w-4" /> : null}
-              {tracked ? "Untrack" : "Track"}
-            </button>
+              {product.title}
+            </Link>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
+              <StoreMark product={product} />
+              <div>{product.category}</div>
+            </div>
           </div>
 
           <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">

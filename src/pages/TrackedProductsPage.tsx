@@ -22,7 +22,7 @@ type TrackedFilter = {
 };
 
 export function TrackedProductsPage() {
-  const { trackedIds, isTracked, toggleTracked } = useAppState();
+  const { trackedIds } = useAppState();
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryOptions, setCategoryOptions] =
     useState<ProductCategoryOption[]>(categories);
@@ -286,8 +286,6 @@ export function TrackedProductsPage() {
           <ProductCard
             key={product.id}
             product={product}
-            tracked={isTracked(product.id)}
-            onToggleTracked={toggleTracked}
             compact
           />
         ))}
