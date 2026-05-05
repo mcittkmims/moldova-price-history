@@ -84,14 +84,14 @@ const productMatchesCategory = (product: Product, categoryId: ProductFilters["ca
 const applySort = (products: Product[], sort: ProductSort) => {
   const sorted = [...products];
   const comparePrice = (a: Product, b: Product, ascending: boolean) => {
-    const aPriced = a.currentPrice > 0;
-    const bPriced = b.currentPrice > 0;
+    const aPriced = a.currentPrice != null && a.currentPrice > 0;
+    const bPriced = b.currentPrice != null && b.currentPrice > 0;
     if (aPriced !== bPriced) {
       return aPriced ? -1 : 1;
     }
     return ascending
-      ? a.currentPrice - b.currentPrice
-      : b.currentPrice - a.currentPrice;
+      ? (a.currentPrice ?? 0) - (b.currentPrice ?? 0)
+      : (b.currentPrice ?? 0) - (a.currentPrice ?? 0);
   };
 
   if (sort === "price_asc") {

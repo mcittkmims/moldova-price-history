@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { CSSProperties, useState } from "react";
 import type { Product } from "../../types/product";
 
 type ProductImageProps = {
@@ -6,6 +6,7 @@ type ProductImageProps = {
   className: string;
   placeholderClassName: string;
   imageClassName?: string;
+  style?: CSSProperties;
 };
 
 export function ProductImage({
@@ -13,6 +14,7 @@ export function ProductImage({
   className,
   placeholderClassName,
   imageClassName = "h-full w-full object-contain p-1",
+  style,
 }: ProductImageProps) {
   const [failed, setFailed] = useState(false);
   const showImage = product.imageUrl && !failed;
@@ -21,6 +23,7 @@ export function ProductImage({
     <div
       className={className}
       aria-hidden="true"
+      style={style}
     >
       {showImage ? (
         <img

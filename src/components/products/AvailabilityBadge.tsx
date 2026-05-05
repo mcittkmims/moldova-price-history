@@ -14,6 +14,8 @@ export function AvailabilityBadge({ availability }: AvailabilityBadgeProps) {
       "border-sky-200 bg-sky-50 text-sky-800 dark:border-sky-900/70 dark:bg-sky-950/40 dark:text-sky-300",
     "Out of stock":
       "border-rose-200 bg-rose-50 text-rose-800 dark:border-rose-900/70 dark:bg-rose-950/40 dark:text-rose-300",
+    Unknown:
+      "border-slate-200 bg-slate-50 text-slate-700 dark:border-neutral-700 dark:bg-neutral-900/60 dark:text-neutral-300",
   }[availability];
 
   return (

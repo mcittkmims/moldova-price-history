@@ -34,11 +34,11 @@ export type Product = {
   storeId?: StoreId;
   store: StoreName;
   category: ProductCategory;
-  currentPrice: number;
-  previousPrice: number;
+  currentPrice: number | null;
+  previousPrice: number | null;
   currency: "MDL";
 
-  availability: "In stock" | "Low stock" | "Preorder" | "Out of stock";
+  availability: "In stock" | "Low stock" | "Preorder" | "Out of stock" | "Unknown";
   url: string;
   imageTone: string;
   imageUrl?: string | null;

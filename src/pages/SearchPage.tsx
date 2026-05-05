@@ -36,25 +36,25 @@ function mergeAndSort(prev: Product[], incoming: Product[], sort: ProductSort): 
 
   if (sort === "price_asc") {
     return combined.sort((a, b) => {
-      const aPriced = a.currentPrice > 0;
-      const bPriced = b.currentPrice > 0;
+      const aPriced = a.currentPrice != null && a.currentPrice > 0;
+      const bPriced = b.currentPrice != null && b.currentPrice > 0;
       if (aPriced !== bPriced) return aPriced ? -1 : 1;
-      return a.currentPrice - b.currentPrice;
+      return (a.currentPrice ?? 0) - (b.currentPrice ?? 0);
     });
   }
   if (sort === "price_desc") {
     return combined.sort((a, b) => {
-      const aPriced = a.currentPrice > 0;
-      const bPriced = b.currentPrice > 0;
+      const aPriced = a.currentPrice != null && a.currentPrice > 0;
+      const bPriced = b.currentPrice != null && b.currentPrice > 0;
       if (aPriced !== bPriced) return aPriced ? -1 : 1;
-      return b.currentPrice - a.currentPrice;
+      return (b.currentPrice ?? 0) - (a.currentPrice ?? 0);
     });
   }
   return combined;
 }
 
 export function SearchPage() {
-  const { defaultSort, setDefaultSort, isTracked, toggleTracked } = useAppState();
+  const { defaultSort, setDefaultSort } = useAppState();
   const [filters, setFilters] = useState<ProductFilters>(initialFilters);
   const [searchFilters, setSearchFilters] = useState<ProductFilters>(initialFilters);
   const [sort, setSort] = useState<ProductSort>(validSort(defaultSort));
@@ -245,11 +245,7 @@ export function SearchPage() {
             const isLast = index === products.length - 1;
             return (
               <div key={product.id} ref={isLast ? lastElementRef : null} className="min-w-0 overflow-hidden">
-                <ProductCard
-                  product={product}
-                  tracked={isTracked(product.id)}
-                  onToggleTracked={toggleTracked}
-                />
+                <ProductCard product={product} />
               </div>
             );
           })}

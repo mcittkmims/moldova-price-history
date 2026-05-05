@@ -1,4 +1,4 @@
-import { ExternalLink, Trash2 } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AvailabilityBadge } from "./AvailabilityBadge";
 import { ProductImage } from "./ProductImage";
@@ -7,94 +7,86 @@ import type { Product } from "../../types/product";
 import {
   formatDate,
   formatMdl,
+  hasPrice,
   getPriceDrop,
   getPriceDropPercent,
 } from "../../utils/pricing";
 
 type ProductCardProps = {
   product: Product;
-  tracked: boolean;
-  onToggleTracked: (productId: string) => void;
   compact?: boolean;
 };
 
 export function ProductCard({
   product,
-  tracked,
-  onToggleTracked,
   compact = false,
 }: ProductCardProps) {
   const drop = getPriceDrop(product);
-  const isLower = drop > 0;
+  const isLower = drop != null && drop > 0;
+  const hasCurrentPrice = hasPrice(product.currentPrice);
+  const hasPreviousPrice = hasPrice(product.previousPrice);
+  const noStorePrice = !hasCurrentPrice;
+  const imageBackdrop = {
+    background: "#ffffff",
+  };
 
   return (
-    <article className="w-full min-w-0 overflow-hidden rounded-lg border border-ink-200 bg-white p-3 shadow-soft sm:p-4 dark:border-neutral-800 dark:bg-[#171717]">
-      <div className="flex min-w-0 gap-3 sm:gap-4">
+    <article className="w-full min-w-0 overflow-hidden rounded-[20px] border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
+      <div className="flex min-w-0 flex-col sm:flex-row">
         <Link
           to={`/products/${product.id}`}
-          className="block h-14 w-14 shrink-0 sm:h-20 sm:w-20"
+          className="block shrink-0 sm:w-[132px]"
           aria-label={`Open ${product.title}`}
         >
           <ProductImage
             product={product}
-            className="grid h-full w-full place-items-center overflow-hidden rounded-md border border-ink-200 bg-white dark:border-neutral-700"
-            placeholderClassName="h-8 w-5 rounded-sm border border-ink-200 bg-ink-50 sm:h-10 sm:w-7"
+            className="grid aspect-[4/3] w-full place-items-center overflow-hidden border-b border-ink-200 dark:border-neutral-800 sm:h-full sm:min-h-[200px] sm:border-b-0 sm:border-r"
+            imageClassName="h-full w-full object-contain p-5 sm:p-4"
+            placeholderClassName="h-24 w-16 rounded-md border border-white/70 bg-white/80 sm:h-20 sm:w-14"
+            style={imageBackdrop}
           />
         </Link>
 
-        <div className="min-w-0 flex-1 overflow-hidden">
-          <div className="flex min-w-0 items-start justify-between gap-2 sm:gap-3">
-            <div className="min-w-0 flex-1">
-              <Link
-                to={`/products/${product.id}`}
-                className="block truncate text-[15px] font-semibold hover:text-moss-700 dark:hover:text-moss-500"
-              >
-                {product.title}
-              </Link>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
-                <StoreMark product={product} />
-                <div>{product.category}</div>
-
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => onToggleTracked(product.id)}
-              className={[
-                "inline-flex h-8 shrink-0 items-center gap-1.5 rounded-md border px-2 text-xs transition-colors sm:h-9 sm:gap-2 sm:px-3 sm:text-sm",
-                tracked
-                  ? "border-ink-300 bg-ink-50 text-ink-800 hover:bg-ink-100 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700"
-                  : "border-moss-700 bg-moss-700 text-white hover:bg-moss-900 dark:border-moss-600 dark:bg-moss-600 dark:hover:bg-moss-700",
-              ].join(" ")}
+        <div className="min-w-0 flex-1 overflow-hidden p-4 sm:p-5">
+          <div className="min-w-0 flex-1">
+            <Link
+              to={`/products/${product.id}`}
+              className="block text-[15px] font-semibold leading-6 hover:text-moss-700 sm:text-base dark:hover:text-moss-500"
             >
-              {compact && tracked ? <Trash2 className="h-4 w-4" /> : null}
-              {tracked ? "Untrack" : "Track"}
-            </button>
+              {product.title}
+            </Link>
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
+              <StoreMark product={product} />
+              <div>{product.category}</div>
+            </div>
           </div>
 
           <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
-            {product.availability === "Out of stock" ? (
+            {noStorePrice ? (
               <div className="min-w-0">
-                <div className="truncate text-lg font-semibold sm:text-xl text-ink-400 dark:text-neutral-500">
-                  Unavailable
+                <div className="truncate text-xl font-semibold text-ink-700 dark:text-neutral-200 sm:text-xl">
+                  No price listed
                 </div>
-                <div className="mt-1 truncate text-xs sm:text-sm invisible select-none">
-                  &nbsp;
+                <div className="mt-1 truncate text-xs text-ink-500 sm:text-sm dark:text-neutral-400">
+                  {product.availability === "Out of stock"
+                    ? "Currently out of stock at the store."
+                    : "The store page does not publish a price right now."}
                 </div>
               </div>
             ) : (
               <>
                 <div className="min-w-0">
-                  <div className="truncate text-lg font-semibold sm:text-xl">
+                  <div className="truncate text-2xl font-semibold sm:text-xl">
                     {formatMdl(product.currentPrice)}
                   </div>
                   <div className="mt-1 truncate text-xs text-ink-500 sm:text-sm dark:text-neutral-400">
-                    Previous {formatMdl(product.previousPrice)}
+                    {hasPreviousPrice
+                      ? `Previous ${formatMdl(product.previousPrice)}`
+                      : "No previous price"}
                   </div>
                 </div>
 
-                <div className="min-w-0 text-xs sm:text-right sm:text-sm">
+                <div className="min-w-0 rounded-2xl bg-ink-50 px-3 py-2 text-xs sm:bg-transparent sm:px-0 sm:py-0 sm:text-right sm:text-sm dark:bg-neutral-800/80 sm:dark:bg-transparent">
                   <div
                     className={
                       isLower
@@ -102,12 +94,14 @@ export function ProductCard({
                         : "font-medium text-rust-700 dark:text-rust-500"
                     }
                   >
-                    {isLower
-                      ? `${formatMdl(drop)} lower`
-                      : `${formatMdl(Math.abs(drop))} higher`}
+                    {drop == null
+                      ? "No price change"
+                      : isLower
+                        ? `${formatMdl(drop)} lower`
+                        : `${formatMdl(Math.abs(drop))} higher`}
                   </div>
                   <div className="mt-1 text-ink-500 dark:text-neutral-400">
-                    {isLower ? getPriceDropPercent(product) : 0}% since last price
+                    {drop == null ? "Waiting for a comparable price" : `${isLower ? getPriceDropPercent(product) : 0}% since last price`}
                   </div>
                 </div>
               </>

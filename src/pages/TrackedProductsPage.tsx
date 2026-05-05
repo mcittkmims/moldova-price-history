@@ -22,7 +22,7 @@ type TrackedFilter = {
 };
 
 export function TrackedProductsPage() {
-  const { trackedIds, isTracked, toggleTracked } = useAppState();
+  const { trackedIds } = useAppState();
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryOptions, setCategoryOptions] =
     useState<ProductCategoryOption[]>(categories);
@@ -75,14 +75,14 @@ export function TrackedProductsPage() {
 
   const visibleProducts = useMemo(() => {
     const comparePrice = (a: Product, b: Product, ascending: boolean) => {
-      const aPriced = a.currentPrice > 0;
-      const bPriced = b.currentPrice > 0;
+      const aPriced = a.currentPrice != null && a.currentPrice > 0;
+      const bPriced = b.currentPrice != null && b.currentPrice > 0;
       if (aPriced !== bPriced) {
         return aPriced ? -1 : 1;
       }
       return ascending
-        ? a.currentPrice - b.currentPrice
-        : b.currentPrice - a.currentPrice;
+        ? (a.currentPrice ?? 0) - (b.currentPrice ?? 0)
+        : (b.currentPrice ?? 0) - (a.currentPrice ?? 0);
     };
     const filtered = products.filter((product) => {
       const matchesStore =
@@ -171,7 +171,7 @@ export function TrackedProductsPage() {
                 <dd className="text-right font-medium">
                   {stats.biggestDrop
                     ? `${formatMdl(getPriceDrop(stats.biggestDrop))} on ${stats.biggestDrop.title}`
-                    : formatMdl(0)}
+                    : "No comparable prices yet"}
                 </dd>
               </div>
               <div className="flex items-center justify-between gap-4 py-3">
@@ -286,8 +286,6 @@ export function TrackedProductsPage() {
           <ProductCard
             key={product.id}
             product={product}
-            tracked={isTracked(product.id)}
-            onToggleTracked={toggleTracked}
             compact
           />
         ))}
