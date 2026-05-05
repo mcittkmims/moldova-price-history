@@ -109,6 +109,15 @@ export function SearchControls({
           </select>
         </label>
       </div>
+
+      <div className="mt-4 flex justify-end">
+        <button
+          type="submit"
+          className="inline-flex h-10 w-full items-center justify-center rounded-md bg-moss-700 px-4 text-sm font-medium text-white transition-colors hover:bg-moss-900 sm:w-auto dark:bg-moss-600 dark:hover:bg-moss-700"
+        >
+          Search products
+        </button>
+      </div>
     </form>
   );
 }

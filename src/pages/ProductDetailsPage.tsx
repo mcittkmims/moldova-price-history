@@ -11,6 +11,7 @@ import type { Product } from "../types/product";
 import {
   formatDate,
   formatMdl,
+  hasPrice,
   getHighestPrice,
   getLowestPrice,
   getPriceDrop,
@@ -70,6 +71,7 @@ export function ProductDetailsPage() {
   const priceDrop = getPriceDrop(product);
   const lowest = getLowestPrice(product.history);
   const highest = getHighestPrice(product.history);
+  const hasCurrentPrice = hasPrice(product.currentPrice);
 
   return (
     <div className="mx-auto w-full max-w-[1500px] space-y-5">
@@ -128,6 +130,11 @@ export function ProductDetailsPage() {
               <div className="mt-1 text-3xl font-semibold">
                 {formatMdl(product.currentPrice)}
               </div>
+              {!hasCurrentPrice ? (
+                <div className="mt-2 text-sm text-ink-500 dark:text-neutral-400">
+                  The store page does not publish a price right now.
+                </div>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-2 gap-3 border-t border-ink-200 pt-4 text-sm dark:border-neutral-800">
@@ -179,14 +186,20 @@ export function ProductDetailsPage() {
             <div>
               <h2 className="text-lg font-semibold">Price history</h2>
               <p className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-                Historical prices from the current mock service.
+                Historical prices from the current search service.
               </p>
             </div>
             <div className="text-sm text-ink-500 dark:text-neutral-400">
               {product.history.length} observations
             </div>
           </div>
-          <PriceHistoryChart data={product.history} />
+          {product.history.length > 0 ? (
+            <PriceHistoryChart data={product.history} />
+          ) : (
+            <div className="rounded-md border border-dashed border-ink-200 p-6 text-sm text-ink-500 dark:border-neutral-700 dark:text-neutral-400">
+              No price history is available because the store did not publish a comparable price.
+            </div>
+          )}
         </section>
       </div>
     </div>
