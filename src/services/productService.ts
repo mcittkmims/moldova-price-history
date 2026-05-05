@@ -12,6 +12,9 @@ import type {
 const API_BASE_URL =
   import.meta.env.VITE_PRICE_HISTORY_API_URL?.replace(/\/$/, "") ??
   "http://localhost:8080";
+const IMAGE_PROXY_BASE_URL = import.meta.env.PROD
+  ? (import.meta.env.VITE_IMAGE_PROXY_URL?.replace(/\/$/, "") ?? "https://proxy.pricehistory.md")
+  : "";
 
 const liveProductsById = new Map<string, Product>();
 
@@ -26,7 +29,10 @@ const proxiedImageUrl = (imageUrl?: string | null) => {
   if (!imageUrl || !isLikelyUrl(imageUrl)) {
     return imageUrl;
   }
-  return `${API_BASE_URL}/images/proxy?url=${encodeURIComponent(imageUrl)}`;
+  if (!IMAGE_PROXY_BASE_URL) {
+    return imageUrl;
+  }
+  return `${IMAGE_PROXY_BASE_URL}/proxy?url=${encodeURIComponent(imageUrl)}`;
 };
 
 const normalizeProduct = (product: Product): Product => ({
