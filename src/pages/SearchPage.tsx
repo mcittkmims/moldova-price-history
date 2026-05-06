@@ -27,6 +27,8 @@ const validSort = (sort: ProductSort): ProductSort =>
     ? sort
     : "default";
 
+const storePageKey = (storeId: string, page: number) => `${storeId}:${page}`;
+
 /** Merge new products into existing list, dedup by id, then sort globally. */
 function mergeAndSort(prev: Product[], incoming: Product[], sort: ProductSort): Product[] {
   const map = new Map<string, Product>();
@@ -59,41 +61,55 @@ export function SearchPage() {
   const [searchFilters, setSearchFilters] = useState<ProductFilters>(initialFilters);
   const [sort, setSort] = useState<ProductSort>(validSort(defaultSort));
   const [searchSort, setSearchSort] = useState<ProductSort>(validSort(defaultSort));
+  const [searchSession, setSearchSession] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryOptions, setCategoryOptions] = useState<ProductCategoryOption[]>(categories);
   const [storeOptions, setStoreOptions] = useState<StoreOption[]>(stores);
   const [searchSortOptions, setSearchSortOptions] = useState<SortOption[]>(sortOptions);
 
-  // Loading state: which stores are still in-flight for the current batch
-  const [pendingStores, setPendingStores] = useState<Set<string>>(new Set());
+  // Track individual store/page requests so late responses from the same search stay valid.
+  const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(false);
 
-  // Generation counter — incremented on every new search/page so stale fetches self-discard
+  // Search generation changes only when filters/sort change, not when loading another page.
   const generationRef = useRef(0);
+  const activeSearchKeyRef = useRef("");
+  const requestedPagesRef = useRef<Set<string>>(new Set());
+  const exhaustedStoresRef = useRef<Set<string>>(new Set());
+  const lastLoadTriggerCountRef = useRef<number | null>(null);
 
-  const loading = page === 1 && pendingStores.size > 0;
-  const loadingMore = page > 1 && pendingStores.size > 0;
+  const loading = products.length === 0 && pendingRequests.size > 0;
+  const loadingMore = products.length > 0 && pendingRequests.size > 0;
 
   // Infinite scroll observer
   const observerRef = useRef<IntersectionObserver | null>(null);
   const lastElementRef = useCallback(
     (node: HTMLDivElement | null) => {
-      // Only block during the initial full-page load (page 1 spinner).
-      // During loadingMore we still allow scrolling — the generation counter
-      // handles any race conditions from overlapping page fetches.
-      if (loading) return;
       if (observerRef.current) observerRef.current.disconnect();
+      if (loading || !node) return;
 
       observerRef.current = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting && hasMore && pendingStores.size === 0) {
-          setPage((prev) => prev + 1);
+        if (!entries[0].isIntersecting || !hasMore) {
+          return;
         }
+
+        // Only allow one page advance for a given rendered list size.
+        // This prevents the observer from queuing several pages while the
+        // same last card remains visible and requests are still in flight.
+        if (lastLoadTriggerCountRef.current === products.length) {
+          return;
+        }
+
+        lastLoadTriggerCountRef.current = products.length;
+        setPage((prev) => prev + 1);
       });
-      if (node) observerRef.current.observe(node);
+      observerRef.current.observe(node);
     },
-    [loading, hasMore, pendingStores.size],
+    [hasMore, loading, products.length],
   );
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
 
   useEffect(() => {
     let active = true;
@@ -121,74 +137,127 @@ export function SearchPage() {
     const id = window.setTimeout(() => {
       setSearchFilters(filters);
       setSearchSort(sort);
+      setSearchSession((prev) => prev + 1);
       setPage(1);
       setHasMore(true);
     }, 1000);
     return () => window.clearTimeout(id);
   }, [filters, sort]);
 
-  // Main fetch effect — fires per-store requests in parallel
+  // Main fetch effect — requests the current global page for each store.
   useEffect(() => {
-    if (!searchFilters.query.trim()) {
+    const query = searchFilters.query.trim();
+
+    if (!query) {
+      activeSearchKeyRef.current = "";
+      generationRef.current += 1;
+      requestedPagesRef.current = new Set();
+      exhaustedStoresRef.current = new Set();
+      lastLoadTriggerCountRef.current = null;
       setProducts([]);
-      setPendingStores(new Set());
+      setPendingRequests(new Set());
+      setHasMore(false);
       return;
     }
 
-    // Bump the generation so any still-running fetches from a previous search/page
-    // will see their generation is stale and silently discard their results.
-    const generation = ++generationRef.current;
-
-    // Which store IDs to query: all, or just the one the user filtered to
     const targetStores =
       searchFilters.store !== "All"
         ? [searchFilters.store]
         : STORE_IDS;
+    const searchKey = [
+      searchSession,
+      query,
+      searchFilters.store,
+      searchFilters.category,
+      searchSort,
+    ].join("::");
+    const isNewSearch = activeSearchKeyRef.current !== searchKey;
 
-    // Clear the product list on a fresh search (page 1), keep it for scroll pages
-    if (page === 1) {
+    if (isNewSearch) {
+      activeSearchKeyRef.current = searchKey;
+      generationRef.current += 1;
+      requestedPagesRef.current = new Set();
+      exhaustedStoresRef.current = new Set();
+      lastLoadTriggerCountRef.current = null;
       setProducts([]);
-    }
-    setPendingStores(new Set(targetStores));
+      setPendingRequests(new Set());
+      setHasMore(true);
 
-    let anyStoreHadFullPage = false;
+      if (page !== 1) {
+        setPage(1);
+        return;
+      }
+    }
+
+    const generation = generationRef.current;
+    const updateHasMore = () =>
+      setHasMore(targetStores.some((storeId) => !exhaustedStoresRef.current.has(storeId)));
+
+    let dispatchedAny = false;
 
     targetStores.forEach((storeId) => {
+      if (exhaustedStoresRef.current.has(storeId)) {
+        return;
+      }
+
+      const requestKey = storePageKey(storeId, page);
+      if (requestedPagesRef.current.has(requestKey)) {
+        return;
+      }
+
+      requestedPagesRef.current.add(requestKey);
+      dispatchedAny = true;
+
+      setPendingRequests((prev) => {
+        const next = new Set(prev);
+        next.add(requestKey);
+        return next;
+      });
+
       productService
         .searchProductsForStore(searchFilters, searchSort, page, storeId)
         .then((result) => {
-          // Discard if a newer search/page has already started
-          if (generationRef.current !== generation) return;
+          if (
+            generationRef.current !== generation ||
+            activeSearchKeyRef.current !== searchKey
+          ) {
+            return;
+          }
 
-          if (result.length >= PAGE_SIZE_PER_STORE) {
-            anyStoreHadFullPage = true;
+          if (result.length < PAGE_SIZE_PER_STORE) {
+            exhaustedStoresRef.current.add(storeId);
           }
 
           setProducts((prev) => mergeAndSort(prev, result, searchSort));
-          setPendingStores((prev) => {
+          setPendingRequests((prev) => {
             const next = new Set(prev);
-            next.delete(storeId);
-            // Once all stores have settled, decide hasMore
-            if (next.size === 0) {
-              setHasMore(anyStoreHadFullPage);
-            }
+            next.delete(requestKey);
             return next;
           });
+          updateHasMore();
         })
         .catch(() => {
-          if (generationRef.current !== generation) return;
-          // On error for one store, just mark it done — others continue
-          setPendingStores((prev) => {
+          if (
+            generationRef.current !== generation ||
+            activeSearchKeyRef.current !== searchKey
+          ) {
+            return;
+          }
+
+          exhaustedStoresRef.current.add(storeId);
+          setPendingRequests((prev) => {
             const next = new Set(prev);
-            next.delete(storeId);
-            if (next.size === 0) {
-              setHasMore(anyStoreHadFullPage);
-            }
+            next.delete(requestKey);
             return next;
           });
+          updateHasMore();
         });
     });
-  }, [searchFilters, searchSort, page]);
+
+    if (!dispatchedAny) {
+      updateHasMore();
+    }
+  }, [page, searchFilters, searchSession, searchSort]);
 
   const handleSortChange = (nextSort: ProductSort) => {
     setSort(nextSort);
@@ -198,6 +267,7 @@ export function SearchPage() {
   const handleSearch = () => {
     setSearchFilters(filters);
     setSearchSort(sort);
+    setSearchSession((prev) => prev + 1);
     setPage(1);
     setHasMore(true);
   };
