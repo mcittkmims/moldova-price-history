@@ -15,8 +15,12 @@ const API_BASE_URL =
 const IMAGE_PROXY_BASE_URL = import.meta.env.PROD
   ? (import.meta.env.VITE_IMAGE_PROXY_URL?.replace(/\/$/, "") ?? "https://proxy.pricehistory.md")
   : "";
+const SEARCH_REQUEST_CACHE_TTL_MS = 2 * 60 * 1000;
+const SEARCH_REQUEST_CACHE_MAX_ENTRIES = 200;
 
 const liveProductsById = new Map<string, Product>();
+const cachedSearchResponses = new Map<string, { expiresAt: number; data: unknown }>();
+const inFlightSearchRequests = new Map<string, Promise<unknown>>();
 
 const delay = <T>(value: T) =>
   new Promise<T>((resolve) => {
@@ -105,9 +109,100 @@ const applySort = (products: Product[], sort: ProductSort) => {
   return sorted;
 };
 
-const fetchJson = async <T>(path: string, params?: URLSearchParams) => {
+const buildRequestUrl = (path: string, params?: URLSearchParams) => {
   const query = params ? `?${params.toString()}` : "";
-  const response = await fetch(`${API_BASE_URL}${path}${query}`);
+  return `${API_BASE_URL}${path}${query}`;
+};
+
+const buildRequestCacheKey = (path: string, params?: URLSearchParams) => {
+  if (!params) {
+    return path;
+  }
+
+  const normalizedParams = new URLSearchParams(
+    Array.from(params.entries()).sort(([leftKey, leftValue], [rightKey, rightValue]) => {
+      if (leftKey === rightKey) {
+        return leftValue.localeCompare(rightValue);
+      }
+      return leftKey.localeCompare(rightKey);
+    }),
+  );
+
+  return `${path}?${normalizedParams.toString()}`;
+};
+
+const getCachedSearchResponse = <T>(cacheKey: string) => {
+  const cached = cachedSearchResponses.get(cacheKey);
+  if (!cached) {
+    return null;
+  }
+
+  if (cached.expiresAt <= Date.now()) {
+    cachedSearchResponses.delete(cacheKey);
+    return null;
+  }
+
+  // Refresh recency so frequently reused searches stay in the cache longer.
+  cachedSearchResponses.delete(cacheKey);
+  cachedSearchResponses.set(cacheKey, cached);
+  return cached.data as T;
+};
+
+const rememberCachedSearchResponse = (cacheKey: string, data: unknown) => {
+  cachedSearchResponses.delete(cacheKey);
+  cachedSearchResponses.set(cacheKey, {
+    expiresAt: Date.now() + SEARCH_REQUEST_CACHE_TTL_MS,
+    data,
+  });
+
+  while (cachedSearchResponses.size > SEARCH_REQUEST_CACHE_MAX_ENTRIES) {
+    const oldestKey = cachedSearchResponses.keys().next().value;
+    if (!oldestKey) {
+      break;
+    }
+    cachedSearchResponses.delete(oldestKey);
+  }
+};
+
+const fetchJson = async <T>(
+  path: string,
+  params?: URLSearchParams,
+  options?: { cache?: "search" },
+) => {
+  if (options?.cache === "search") {
+    const cacheKey = buildRequestCacheKey(path, params);
+    const cached = getCachedSearchResponse<T>(cacheKey);
+    if (cached != null) {
+      return cached;
+    }
+
+    const inFlight = inFlightSearchRequests.get(cacheKey) as Promise<T> | undefined;
+    if (inFlight) {
+      return inFlight;
+    }
+
+    const requestPromise = (async () => {
+      const response = await fetch(buildRequestUrl(path, params));
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const data = await response.json() as T;
+      rememberCachedSearchResponse(cacheKey, data);
+      return data;
+    })();
+
+    inFlightSearchRequests.set(cacheKey, requestPromise as Promise<unknown>);
+
+    try {
+      return await requestPromise;
+    } finally {
+      inFlightSearchRequests.delete(cacheKey);
+    }
+  }
+
+  const response = await fetch(buildRequestUrl(path, params));
 
   if (!response.ok) {
     throw new Error(`API request failed: ${response.status}`);
@@ -158,7 +253,9 @@ export const productService = {
     if (filters.category !== "All") params.set("category", filters.category);
 
     try {
-      const products = await fetchJson<Product[]>("/products/search", params);
+      const products = await fetchJson<Product[]>("/products/search", params, {
+        cache: "search",
+      });
       const normalized = products.map(normalizeProduct);
       normalized.forEach((p) => liveProductsById.set(p.id, p));
       return normalized;
@@ -196,7 +293,9 @@ export const productService = {
     }
 
     try {
-      const products = await fetchJson<Product[]>("/products/search", params);
+      const products = await fetchJson<Product[]>("/products/search", params, {
+        cache: "search",
+      });
       const normalizedProducts = products.map(normalizeProduct);
       normalizedProducts.forEach((product) => liveProductsById.set(product.id, product));
       return normalizedProducts;
