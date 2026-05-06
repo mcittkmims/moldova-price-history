@@ -51,7 +51,12 @@ export function ProductCard({
           <div className="min-w-0 flex-1">
             <Link
               to={`/products/${product.id}`}
-              className="block min-h-[3rem] text-[15px] font-semibold leading-6 line-clamp-2 hover:text-moss-700 sm:min-h-[3.25rem] sm:text-base dark:hover:text-moss-500"
+              className="block min-h-[3rem] overflow-hidden break-words text-[15px] font-semibold leading-6 hover:text-moss-700 sm:min-h-[3.25rem] sm:text-base dark:hover:text-moss-500"
+              style={{
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical",
+                WebkitLineClamp: 2,
+              }}
             >
               {product.title}
             </Link>
