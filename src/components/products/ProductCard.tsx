@@ -31,7 +31,7 @@ export function ProductCard({
   };
 
   return (
-    <article className="w-full min-w-0 overflow-hidden rounded-[20px] border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
+    <article className="w-full min-w-0 overflow-hidden rounded-lg border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
       <div className="flex min-w-0 flex-col sm:flex-row">
         <Link
           to={`/products/${product.id}`}
