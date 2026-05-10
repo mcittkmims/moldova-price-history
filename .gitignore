@@ -1,4 +1,11 @@
 node_modules
 dist
+.next
+.next-dev
+.open-next
+.wrangler
+.dev.vars
+.next-stale-*
 *.tsbuildinfo
 .DS_Store
+.codex-instructions.md
