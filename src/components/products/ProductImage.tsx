@@ -1,3 +1,5 @@
+"use client";
+
 import { CSSProperties, useState } from "react";
 import type { Product } from "../../types/product";
 
@@ -30,6 +32,7 @@ export function ProductImage({
           src={product.imageUrl ?? undefined}
           alt=""
           loading="lazy"
+          decoding="async"
           className={imageClassName}
           onError={() => setFailed(true)}
         />

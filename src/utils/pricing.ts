@@ -21,6 +21,14 @@ export const formatDate = (value: string) =>
     month: "short",
   }).format(new Date(value));
 
+export const formatDateTime = (value: string) =>
+  new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+
 export const getPriceDrop = (product: Product) => {
   if (!hasPrice(product.currentPrice) || !hasPrice(product.previousPrice)) {
     return null;

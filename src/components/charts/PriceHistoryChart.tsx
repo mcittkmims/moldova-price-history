@@ -1,3 +1,5 @@
+"use client";
+
 import {
   CartesianGrid,
   Line,
@@ -19,14 +21,19 @@ export function PriceHistoryChart({ data }: PriceHistoryChartProps) {
   const isCompact = useMediaQuery("(max-width: 640px)");
   const chartData = data.map((point) => ({
     date: point.date,
-    label: formatDate(point.date),
+    timestamp: new Date(point.date).getTime(),
     price: point.price,
   }));
+  const firstTimestamp = chartData[0]?.timestamp;
+  const lastTimestamp = chartData[chartData.length - 1]?.timestamp;
+  const hasCollapsedDomain =
+    firstTimestamp != null && lastTimestamp != null && firstTimestamp === lastTimestamp;
+  const xDomain = hasCollapsedDomain
+    ? [firstTimestamp, firstTimestamp + 24 * 60 * 60 * 1000]
+    : ["dataMin", "dataMax"];
   const xTicks = isCompact
-    ? [chartData[0]?.date, chartData[chartData.length - 1]?.date].filter(
-        Boolean,
-      )
-    : chartData.map((point) => point.date);
+    ? [firstTimestamp, lastTimestamp].filter((value): value is number => value != null)
+    : chartData.map((point) => point.timestamp);
 
   return (
     <div className="h-64 w-full min-w-0 sm:h-[320px]">
@@ -41,14 +48,18 @@ export function PriceHistoryChart({ data }: PriceHistoryChartProps) {
         >
           <CartesianGrid stroke="var(--chart-grid)" vertical={false} />
           <XAxis
-            dataKey="date"
+            dataKey="timestamp"
+            type="number"
+            scale="time"
+            domain={xDomain}
             ticks={xTicks}
-            tickFormatter={(value) => formatDate(String(value))}
+            tickFormatter={(value) => formatDate(new Date(Number(value)).toISOString())}
             tick={{ fill: "var(--chart-text)", fontSize: isCompact ? 11 : 12 }}
             tickLine={false}
             tickMargin={8}
             axisLine={{ stroke: "var(--chart-grid)" }}
             minTickGap={isCompact ? 36 : 20}
+            padding={{ left: 0, right: 0 }}
           />
           <YAxis
             width={isCompact ? 42 : 62}
@@ -60,7 +71,7 @@ export function PriceHistoryChart({ data }: PriceHistoryChartProps) {
           />
           <Tooltip
             formatter={(value) => [formatMdl(Number(value)), "Price"]}
-            labelFormatter={(value) => formatDate(String(value))}
+            labelFormatter={(value) => formatDate(new Date(Number(value)).toISOString())}
             contentStyle={{
               borderRadius: 6,
               borderColor: "var(--chart-grid)",

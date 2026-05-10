@@ -1,4 +1,16 @@
-import { mockProducts } from "../data/mockProducts";
+import {
+  PUBLIC_API_BASE_URL,
+  PUBLIC_IMAGE_PROXY_BASE_URL,
+  PUBLIC_PRODUCT_API_BASE_URL,
+} from "../lib/client-env";
+import {
+  categories,
+  sortOptions,
+  stores,
+} from "../lib/catalog";
+import {
+  normalizeProduct,
+} from "../lib/product-helpers";
 import type {
   Product,
   ProductCategoryOption,
@@ -6,109 +18,41 @@ import type {
   ProductSort,
   SortOption,
   StoreOption,
-  StoreName,
 } from "../types/product";
 
-const API_BASE_URL =
-  import.meta.env.VITE_PRICE_HISTORY_API_URL?.replace(/\/$/, "") ??
-  "http://localhost:8080";
-const IMAGE_PROXY_BASE_URL = import.meta.env.PROD
-  ? (import.meta.env.VITE_IMAGE_PROXY_URL?.replace(/\/$/, "") ?? "https://proxy.pricehistory.md")
-  : "";
+const liveProductsByKey = new Map<string, Product>();
+const inFlightRequests = new Map<string, Promise<unknown>>();
+const SUPPORTED_PRODUCT_HOSTS = new Set([
+  "bomba.md",
+  "www.bomba.md",
+  "smart.md",
+  "www.smart.md",
+  "enter.online",
+  "www.enter.online",
+  "darwin.md",
+  "www.darwin.md",
+  "maximum.md",
+  "www.maximum.md",
+  "ultra.md",
+  "www.ultra.md",
+]);
 
-const liveProductsById = new Map<string, Product>();
-const inFlightSearchRequests = new Map<string, Promise<unknown>>();
+export type SearchInputMode =
+  | "empty"
+  | "keyword"
+  | "supported_url"
+  | "unsupported_url";
 
-const delay = <T>(value: T) =>
-  new Promise<T>((resolve) => {
-    window.setTimeout(() => resolve(value), 180);
-  });
-
-const isLikelyUrl = (value: string) => /^https?:\/\//i.test(value.trim());
-
-const proxiedImageUrl = (imageUrl?: string | null) => {
-  if (!imageUrl || !isLikelyUrl(imageUrl)) {
-    return imageUrl;
+const rememberLiveProduct = (product: Product) => {
+  liveProductsByKey.set(product.id, product);
+  if (product.slug) {
+    liveProductsByKey.set(product.slug, product);
   }
-  if (!IMAGE_PROXY_BASE_URL) {
-    return imageUrl;
-  }
-  return `${IMAGE_PROXY_BASE_URL}/proxy?url=${encodeURIComponent(imageUrl)}`;
-};
-
-const normalizeProduct = (product: Product): Product => ({
-  ...product,
-  storeId: product.storeId ?? storeIdFromName(product.store),
-  imageUrl: proxiedImageUrl(product.imageUrl),
-});
-
-const storeIdFromName = (storeName: string) =>
-  stores.find((store) => store.name === storeName)?.id ??
-  storeName.trim().toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
-
-const productMatchesLink = (product: Product, query: string) => {
-  const normalized = query.trim().toLowerCase();
-  return (
-    product.url.toLowerCase() === normalized ||
-    product.url.toLowerCase().includes(normalized) ||
-    normalized.includes(product.id.toLowerCase())
-  );
-};
-
-const productMatchesText = (product: Product, query: string) => {
-  const normalized = query.trim().toLowerCase();
-
-  if (!normalized) {
-    return true;
-  }
-
-  return [
-    product.title,
-    product.store,
-    product.category,
-    product.specs.join(" "),
-    product.url,
-  ]
-    .join(" ")
-    .toLowerCase()
-    .includes(normalized);
-};
-
-const productMatchesCategory = (product: Product, categoryId: ProductFilters["category"]) => {
-  if (categoryId === "All") {
-    return true;
-  }
-  const category = categories.find((item) => item.id === categoryId);
-  return product.category === categoryId || product.category === category?.name;
-};
-
-const applySort = (products: Product[], sort: ProductSort) => {
-  const sorted = [...products];
-  const comparePrice = (a: Product, b: Product, ascending: boolean) => {
-    const aPriced = a.currentPrice != null && a.currentPrice > 0;
-    const bPriced = b.currentPrice != null && b.currentPrice > 0;
-    if (aPriced !== bPriced) {
-      return aPriced ? -1 : 1;
-    }
-    return ascending
-      ? (a.currentPrice ?? 0) - (b.currentPrice ?? 0)
-      : (b.currentPrice ?? 0) - (a.currentPrice ?? 0);
-  };
-
-  if (sort === "price_asc") {
-    return sorted.sort((a, b) => comparePrice(a, b, true));
-  }
-
-  if (sort === "price_desc") {
-    return sorted.sort((a, b) => comparePrice(a, b, false));
-  }
-
-  return sorted;
 };
 
 const buildRequestUrl = (path: string, params?: URLSearchParams) => {
   const query = params ? `?${params.toString()}` : "";
-  return `${API_BASE_URL}${path}${query}`;
+  return `${PUBLIC_API_BASE_URL}${path}${query}`;
 };
 
 const buildRequestCacheKey = (path: string, params?: URLSearchParams) => {
@@ -131,11 +75,11 @@ const buildRequestCacheKey = (path: string, params?: URLSearchParams) => {
 const fetchJson = async <T>(
   path: string,
   params?: URLSearchParams,
-  options?: { cache?: "search" },
+  options?: { dedupe?: boolean },
 ) => {
-  if (options?.cache === "search") {
+  if (options?.dedupe) {
     const cacheKey = buildRequestCacheKey(path, params);
-    const inFlight = inFlightSearchRequests.get(cacheKey) as Promise<T> | undefined;
+    const inFlight = inFlightRequests.get(cacheKey) as Promise<T> | undefined;
     if (inFlight) {
       return inFlight;
     }
@@ -144,47 +88,71 @@ const fetchJson = async <T>(
       const response = await fetch(buildRequestUrl(path, params));
 
       if (!response.ok) {
-        throw new Error(`API request failed: ${response.status}`);
+        throw await responseError(response);
       }
 
       return response.json() as Promise<T>;
     })();
 
-    inFlightSearchRequests.set(cacheKey, requestPromise as Promise<unknown>);
+    inFlightRequests.set(cacheKey, requestPromise as Promise<unknown>);
 
     try {
       return await requestPromise;
     } finally {
-      inFlightSearchRequests.delete(cacheKey);
+      inFlightRequests.delete(cacheKey);
     }
   }
 
   const response = await fetch(buildRequestUrl(path, params));
 
   if (!response.ok) {
-    throw new Error(`API request failed: ${response.status}`);
+    throw await responseError(response);
   }
 
   return response.json() as Promise<T>;
 };
 
-const searchMockProducts = (filters: ProductFilters, sort: ProductSort) => {
-  const query = filters.query.trim();
-  const products = mockProducts.filter((product) => {
-    const matchesQuery = isLikelyUrl(query)
-      ? productMatchesLink(product, query)
-      : productMatchesText(product, query);
-    const productStoreId = product.storeId ?? storeIdFromName(product.store);
-    const matchesStore =
-      filters.store === "All" ||
-      productStoreId === filters.store ||
-      product.store === filters.store;
-    const matchesCategory = productMatchesCategory(product, filters.category);
+const responseError = async (response: Response) => {
+  try {
+    const payload = (await response.json()) as { detail?: string; message?: string };
+    const detail = payload.detail ?? payload.message;
+    if (detail) {
+      return new Error(detail);
+    }
+  } catch {
+    // Ignore non-JSON errors and fall back to status.
+  }
+  return new Error(`API request failed: ${response.status}`);
+};
 
-    return matchesQuery && matchesStore && matchesCategory;
-  });
+export const classifySearchInput = (value: string): SearchInputMode => {
+  const query = value.trim();
+  if (!query) {
+    return "empty";
+  }
+  try {
+    const url = new URL(query);
+    if (!/^https?:$/i.test(url.protocol)) {
+      return "unsupported_url";
+    }
+    return SUPPORTED_PRODUCT_HOSTS.has(url.host.toLowerCase())
+      ? "supported_url"
+      : "unsupported_url";
+  } catch {
+    return "keyword";
+  }
+};
 
-  return applySort(products, sort);
+const tryFetchProductBySlug = async (productSlug: string) => {
+  const detailResponse = await fetch(
+    `${PUBLIC_PRODUCT_API_BASE_URL}/api/products/${encodeURIComponent(productSlug)}`,
+  );
+
+  if (detailResponse.ok) {
+    const product = (await detailResponse.json()) as Product;
+    return normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL);
+  }
+  return null;
 };
 
 const PER_STORE_PAGE_SIZE = 4;
@@ -210,20 +178,15 @@ export const productService = {
     if (filters.category !== "All") params.set("category", filters.category);
 
     try {
-      const products = await fetchJson<Product[]>("/products/search", params, {
-        cache: "search",
-      });
-      const normalized = products.map(normalizeProduct);
-      normalized.forEach((p) => liveProductsById.set(p.id, p));
+      const products = await fetchJson<Product[]>("/products/search", params, { dedupe: true });
+      const normalized = products.map((product) =>
+        normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL),
+      );
+      normalized.forEach(rememberLiveProduct);
       return normalized;
     } catch (error) {
       console.error(`[${storeId}] search failed`, error);
-      // Graceful fallback: filter mock data for this store
-      const allMocks = searchMockProducts(
-        { ...filters, store: storeId },
-        sort,
-      );
-      return allMocks.slice((page - 1) * PER_STORE_PAGE_SIZE, page * PER_STORE_PAGE_SIZE);
+      throw error;
     }
   },
 
@@ -250,73 +213,63 @@ export const productService = {
     }
 
     try {
-      const products = await fetchJson<Product[]>("/products/search", params, {
-        cache: "search",
-      });
-      const normalizedProducts = products.map(normalizeProduct);
-      normalizedProducts.forEach((product) => liveProductsById.set(product.id, product));
+      const products = await fetchJson<Product[]>("/products/search", params, { dedupe: true });
+      const normalizedProducts = products.map((product) =>
+        normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL),
+      );
+      normalizedProducts.forEach(rememberLiveProduct);
       return normalizedProducts;
     } catch (error) {
       console.error(error);
-      const allMocks = searchMockProducts(filters, sort);
-      return allMocks.slice((page - 1) * 24, page * 24);
+      return [];
     }
   },
 
-  async getProduct(productId: string) {
-    const liveProduct = liveProductsById.get(productId);
+  async resolveProductUrl(url: string) {
+    const params = new URLSearchParams({ url: url.trim() });
+    const product = await fetchJson<Product>("/products/by-url", params, { dedupe: true });
+    const normalizedProduct = normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL);
+    rememberLiveProduct(normalizedProduct);
+    return normalizedProduct;
+  },
+
+  async getProduct(productKey: string) {
+    const liveProduct = liveProductsByKey.get(productKey);
     if (liveProduct) {
       return liveProduct;
     }
 
-    return delay(
-      mockProducts.find((product) => product.id === productId) ?? null,
-    );
+    try {
+      const fetchedProduct = await tryFetchProductBySlug(productKey);
+      if (fetchedProduct) {
+        rememberLiveProduct(fetchedProduct);
+        return fetchedProduct;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+
+    return null;
   },
 
-  async getProductsByIds(productIds: string[]) {
-    const idSet = new Set(productIds);
-    return delay(mockProducts.filter((product) => idSet.has(product.id)));
+  async getProductsBySlugs(productSlugs: string[]) {
+    const products = await Promise.all(
+      productSlugs.map((productSlug) => productService.getProduct(productSlug)),
+    );
+    return products.filter((product): product is Product => product != null);
   },
 
   async getStores() {
-    return delay(stores);
+    return stores;
   },
 
   async getCategories() {
-    return delay(categories);
+    return categories;
   },
 
   async getSortOptions() {
-    return delay(sortOptions);
+    return sortOptions;
   },
 };
 
-export const stores = [
-  { id: "darwin", name: "Darwin", logoPath: "/store-logos/darwin.png", faviconPath: "/store-favicons/darwin.png" },
-  { id: "enter", name: "Enter", logoPath: "/store-logos/enter.png", faviconPath: "/store-favicons/enter.png" },
-  { id: "maximum", name: "Maximum", logoPath: "/store-logos/maximum.png", faviconPath: "/store-favicons/maximum.png" },
-  { id: "smart", name: "Smart.md", logoPath: "/store-logos/smart.png", faviconPath: "/store-favicons/smart.png" },
-  { id: "bomba", name: "Bomba", logoPath: "/store-logos/bomba.png", faviconPath: "/store-favicons/bomba.png" },
-  { id: "ultra", name: "Ultra", logoPath: "/store-logos/ultra.png", faviconPath: "/store-favicons/ultra.png" },
-] as StoreOption[];
-
-export const categories = [
-  { id: "phones", name: "Phones" },
-  { id: "laptops", name: "Laptops" },
-  { id: "tablets", name: "Tablets" },
-  { id: "tvs", name: "TVs" },
-  { id: "headphones", name: "Headphones" },
-  { id: "smartwatches", name: "Smartwatches" },
-  { id: "refrigerators", name: "Refrigerators" },
-  { id: "washing_machines", name: "Washing machines" },
-  { id: "dishwashers", name: "Dishwashers" },
-  { id: "vacuums", name: "Vacuums" },
-] as ProductCategoryOption[];
-
-export const sortOptions = [
-  { id: "default", name: "Store default" },
-  { id: "price_asc", name: "Price ascending" },
-  { id: "price_desc", name: "Price descending" },
-  { id: "popularity", name: "Popularity" },
-] as SortOption[];
+export { categories, sortOptions, stores };
