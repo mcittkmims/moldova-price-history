@@ -1,9 +1,13 @@
+"use client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { LoaderCircle } from "lucide-react";
-import { ProductCard } from "../components/products/ProductCard";
-import { SearchControls } from "../components/products/SearchControls";
-import { useAppState } from "../context/AppStateContext";
-import { categories, productService, sortOptions, stores } from "../services/productService";
+import { ProductCard } from "../products/ProductCard";
+import { SearchControls } from "../products/SearchControls";
+import { useAppState } from "../../context/AppStateContext";
+import { toErrorMessage } from "../../services/apiClient";
+import { categories, classifySearchInput, productService, sortOptions, stores } from "../../services/productService";
 import type {
   Product,
   ProductCategoryOption,
@@ -11,10 +15,10 @@ import type {
   ProductSort,
   SortOption,
   StoreOption,
-} from "../types/product";
+} from "../../types/product";
 
-const STORE_IDS = stores.map((s) => s.id);
-const PAGE_SIZE_PER_STORE = 4; // how many items to request per store per page
+const STORE_IDS = stores.map((store) => store.id);
+const PAGE_SIZE_PER_STORE = 4;
 
 const initialFilters: ProductFilters = {
   query: "",
@@ -29,33 +33,35 @@ const validSort = (sort: ProductSort): ProductSort =>
 
 const storePageKey = (storeId: string, page: number) => `${storeId}:${page}`;
 
-/** Merge new products into existing list, dedup by id, then sort globally. */
 function mergeAndSort(prev: Product[], incoming: Product[], sort: ProductSort): Product[] {
   const map = new Map<string, Product>();
-  for (const p of prev) map.set(p.id, p);
-  for (const p of incoming) map.set(p.id, p);
+  for (const product of prev) map.set(product.id, product);
+  for (const product of incoming) map.set(product.id, product);
   const combined = Array.from(map.values());
 
   if (sort === "price_asc") {
-    return combined.sort((a, b) => {
-      const aPriced = a.currentPrice != null && a.currentPrice > 0;
-      const bPriced = b.currentPrice != null && b.currentPrice > 0;
-      if (aPriced !== bPriced) return aPriced ? -1 : 1;
-      return (a.currentPrice ?? 0) - (b.currentPrice ?? 0);
+    return combined.sort((left, right) => {
+      const leftPriced = left.currentPrice != null && left.currentPrice > 0;
+      const rightPriced = right.currentPrice != null && right.currentPrice > 0;
+      if (leftPriced !== rightPriced) return leftPriced ? -1 : 1;
+      return (left.currentPrice ?? 0) - (right.currentPrice ?? 0);
     });
   }
+
   if (sort === "price_desc") {
-    return combined.sort((a, b) => {
-      const aPriced = a.currentPrice != null && a.currentPrice > 0;
-      const bPriced = b.currentPrice != null && b.currentPrice > 0;
-      if (aPriced !== bPriced) return aPriced ? -1 : 1;
-      return (b.currentPrice ?? 0) - (a.currentPrice ?? 0);
+    return combined.sort((left, right) => {
+      const leftPriced = left.currentPrice != null && left.currentPrice > 0;
+      const rightPriced = right.currentPrice != null && right.currentPrice > 0;
+      if (leftPriced !== rightPriced) return leftPriced ? -1 : 1;
+      return (right.currentPrice ?? 0) - (left.currentPrice ?? 0);
     });
   }
+
   return combined;
 }
 
 export function SearchPage() {
+  const router = useRouter();
   const { defaultSort, setDefaultSort } = useAppState();
   const [filters, setFilters] = useState<ProductFilters>(initialFilters);
   const [searchFilters, setSearchFilters] = useState<ProductFilters>(initialFilters);
@@ -66,24 +72,23 @@ export function SearchPage() {
   const [categoryOptions, setCategoryOptions] = useState<ProductCategoryOption[]>(categories);
   const [storeOptions, setStoreOptions] = useState<StoreOption[]>(stores);
   const [searchSortOptions, setSearchSortOptions] = useState<SortOption[]>(sortOptions);
-
-  // Track individual store/page requests so late responses from the same search stay valid.
   const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [filterError, setFilterError] = useState<string | null>(null);
+  const [resolvingUrl, setResolvingUrl] = useState(false);
 
-  // Search generation changes only when filters/sort change, not when loading another page.
   const generationRef = useRef(0);
   const activeSearchKeyRef = useRef("");
   const requestedPagesRef = useRef<Set<string>>(new Set());
   const exhaustedStoresRef = useRef<Set<string>>(new Set());
   const lastLoadTriggerCountRef = useRef<number | null>(null);
-
-  const loading = products.length === 0 && pendingRequests.size > 0;
-  const loadingMore = products.length > 0 && pendingRequests.size > 0;
-
-  // Infinite scroll observer
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  const loading = resolvingUrl || (products.length === 0 && pendingRequests.size > 0);
+  const loadingMore = !resolvingUrl && products.length > 0 && pendingRequests.size > 0;
+
   const lastElementRef = useCallback(
     (node: HTMLDivElement | null) => {
       if (observerRef.current) observerRef.current.disconnect();
@@ -94,9 +99,6 @@ export function SearchPage() {
           return;
         }
 
-        // Only allow one page advance for a given rendered list size.
-        // This prevents the observer from queuing several pages while the
-        // same last card remains visible and requests are still in flight.
         if (lastLoadTriggerCountRef.current === products.length) {
           return;
         }
@@ -113,27 +115,48 @@ export function SearchPage() {
 
   useEffect(() => {
     let active = true;
-    productService.getCategories().then((result) => {
-      if (active) setCategoryOptions(result);
-    });
-    return () => { active = false; };
+    productService
+      .getCategories()
+      .then((result) => {
+        if (active) {
+          setCategoryOptions(result);
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        if (active) {
+          setFilterError("Could not load categories right now.");
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   useEffect(() => {
     let active = true;
-    Promise.all([productService.getStores(), productService.getSortOptions()]).then(
-      ([nextStores, nextSortOptions]) => {
+    Promise.all([productService.getStores(), productService.getSortOptions()])
+      .then(([nextStores, nextSortOptions]) => {
         if (active) {
           setStoreOptions(nextStores);
           setSearchSortOptions(nextSortOptions);
         }
-      },
-    );
-    return () => { active = false; };
+      })
+      .catch((error) => {
+        console.error(error);
+        if (active) {
+          setFilterError("Could not load search filters right now.");
+        }
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  // Debounce filter/sort changes → reset to page 1
   useEffect(() => {
+    if (classifySearchInput(filters.query) !== "keyword") {
+      return;
+    }
     const id = window.setTimeout(() => {
       setSearchFilters(filters);
       setSearchSort(sort);
@@ -144,11 +167,11 @@ export function SearchPage() {
     return () => window.clearTimeout(id);
   }, [filters, sort]);
 
-  // Main fetch effect — requests the current global page for each store.
   useEffect(() => {
     const query = searchFilters.query.trim();
+    const mode = classifySearchInput(query);
 
-    if (!query) {
+    if (mode === "empty") {
       activeSearchKeyRef.current = "";
       generationRef.current += 1;
       requestedPagesRef.current = new Set();
@@ -157,20 +180,21 @@ export function SearchPage() {
       setProducts([]);
       setPendingRequests(new Set());
       setHasMore(false);
+      setSearchError(null);
+      setResolvingUrl(false);
       return;
     }
 
-    const targetStores =
-      searchFilters.store !== "All"
-        ? [searchFilters.store]
-        : STORE_IDS;
-    const searchKey = [
-      searchSession,
-      query,
-      searchFilters.store,
-      searchFilters.category,
-      searchSort,
-    ].join("::");
+    const targetStores = searchFilters.store !== "All" ? [searchFilters.store] : STORE_IDS;
+    const searchKey = mode === "keyword"
+      ? [
+          searchSession,
+          query,
+          searchFilters.store,
+          searchFilters.category,
+          searchSort,
+        ].join("::")
+      : [searchSession, query, mode].join("::");
     const isNewSearch = activeSearchKeyRef.current !== searchKey;
 
     if (isNewSearch) {
@@ -181,7 +205,9 @@ export function SearchPage() {
       lastLoadTriggerCountRef.current = null;
       setProducts([]);
       setPendingRequests(new Set());
-      setHasMore(true);
+      setHasMore(mode === "keyword");
+      setSearchError(null);
+      setResolvingUrl(false);
 
       if (page !== 1) {
         setPage(1);
@@ -189,7 +215,49 @@ export function SearchPage() {
       }
     }
 
+    if (mode !== "keyword" && !isNewSearch) {
+      return;
+    }
+
     const generation = generationRef.current;
+
+    if (mode === "unsupported_url") {
+      setSearchError("Paste a product link from Enter, Darwin, Maximum, Smart, Bomba, or Ultra.");
+          setHasMore(false);
+          return;
+        }
+
+        if (mode === "supported_url") {
+      setResolvingUrl(true);
+      setHasMore(false);
+      productService
+        .resolveProductUrl(query)
+        .then((product) => {
+          if (
+            generationRef.current !== generation ||
+            activeSearchKeyRef.current !== searchKey
+          ) {
+            return;
+          }
+
+          router.push(`/products/${encodeURIComponent(product.slug)}`);
+        })
+        .catch((error) => {
+          if (
+            generationRef.current !== generation ||
+            activeSearchKeyRef.current !== searchKey
+          ) {
+            return;
+          }
+
+          setResolvingUrl(false);
+          setSearchError(toErrorMessage(error, "Could not resolve that product link."));
+        });
+      return;
+    }
+
+    setResolvingUrl(false);
+    setSearchError(null);
     const updateHasMore = () =>
       setHasMore(targetStores.some((storeId) => !exhaustedStoresRef.current.has(storeId)));
 
@@ -236,7 +304,7 @@ export function SearchPage() {
           });
           updateHasMore();
         })
-        .catch(() => {
+        .catch((error) => {
           if (
             generationRef.current !== generation ||
             activeSearchKeyRef.current !== searchKey
@@ -245,6 +313,11 @@ export function SearchPage() {
           }
 
           exhaustedStoresRef.current.add(storeId);
+          setSearchError((current) => current ?? (
+            targetStores.length > 1
+              ? "Some store results could not be loaded."
+              : toErrorMessage(error, "Could not load products right now.")
+          ));
           setPendingRequests((prev) => {
             const next = new Set(prev);
             next.delete(requestKey);
@@ -282,7 +355,9 @@ export function SearchPage() {
           </p>
         </div>
         <div className="text-sm text-ink-500 dark:text-neutral-400">
-          {loading
+          {resolvingUrl
+            ? "Resolving link…"
+            : loading
             ? "Searching…"
             : `${products.length} result${products.length === 1 ? "" : "s"}`}
         </div>
@@ -299,13 +374,29 @@ export function SearchPage() {
         onSearch={handleSearch}
       />
 
+      {filterError ? (
+        <div className="rounded-lg border border-rust-100 bg-rust-50 px-4 py-3 text-sm text-rust-700 dark:border-rust-700 dark:bg-[#2b170d] dark:text-rust-100">
+          {filterError}
+        </div>
+      ) : null}
+
+      {searchError ? (
+        <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900/60 dark:bg-rose-950/30 dark:text-rose-200">
+          {searchError}
+        </div>
+      ) : null}
+
       {loading && products.length === 0 ? (
         <div className="grid min-h-[260px] place-items-center rounded-lg border border-ink-200 bg-white p-8 text-center shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
           <div>
             <LoaderCircle className="mx-auto h-8 w-8 animate-spin text-moss-700 dark:text-moss-500" />
-            <div className="mt-4 text-sm font-medium">Searching products</div>
+            <div className="mt-4 text-sm font-medium">
+              {resolvingUrl ? "Opening product page" : "Searching products"}
+            </div>
             <div className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-              Checking Moldova stores for the latest matches.
+              {resolvingUrl
+                ? "Loading product details."
+                : "Checking Moldova stores for the latest matches."}
             </div>
           </div>
         </div>
@@ -322,13 +413,13 @@ export function SearchPage() {
         </div>
       )}
 
-      {loadingMore && (
-        <div className="py-6 flex justify-center">
+      {loadingMore ? (
+        <div className="flex justify-center py-6">
           <LoaderCircle className="h-6 w-6 animate-spin text-moss-700 dark:text-moss-500" />
         </div>
-      )}
+      ) : null}
 
-      {!loading && products.length === 0 ? (
+      {!loading && !searchError && searchFilters.query.trim() && products.length === 0 ? (
         <div className="rounded-lg border border-ink-200 bg-white p-6 text-sm text-ink-600 shadow-soft dark:border-neutral-800 dark:bg-[#171717] dark:text-neutral-300">
           No matching products. Try a store name, category, model, or a known product URL.
         </div>

@@ -1,10 +1,14 @@
+"use client";
+
 import {
   ArrowRight,
   Bell,
   Search,
   Store,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
+import { useMemo } from "react";
+import { useAuth } from "../../context/AuthContext";
 
 const watchedProducts = [
   {
@@ -88,6 +92,12 @@ function ProductPreviewImage({ name, tone, type }: ProductPreviewImageProps) {
 }
 
 export function HomePage() {
+  const { isAuthenticated } = useAuth();
+  const trackedHref = useMemo(
+    () => (isAuthenticated ? "/tracked" : "/login?next=%2Ftracked"),
+    [isAuthenticated],
+  );
+
   return (
     <div className="mx-auto w-full max-w-[1500px] pb-12">
       <section className="grid min-h-[calc(100vh-10rem)] grid-cols-[minmax(0,1fr)] content-center justify-items-center gap-8 border-b border-ink-200 py-10 xl:grid-cols-[minmax(480px,680px)_minmax(380px,460px)] xl:items-center xl:justify-items-stretch xl:justify-between dark:border-neutral-800">
@@ -102,14 +112,14 @@ export function HomePage() {
 
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
-              to="/search"
+              href="/search"
               className="inline-flex h-11 items-center gap-2 rounded-md bg-ink-900 px-5 text-sm font-medium text-white transition-colors hover:bg-ink-700 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-300"
             >
               Search products
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
-              to="/tracked"
+              href={trackedHref}
               className="inline-flex h-11 items-center gap-2 rounded-md border border-ink-200 bg-white px-5 text-sm font-medium text-ink-800 transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
             >
               View tracked products
@@ -165,7 +175,6 @@ export function HomePage() {
                 <circle cx="340" cy="78" r="5" fill="#059669" />
               </svg>
             </div>
-
           </div>
         </div>
       </section>
@@ -260,7 +269,7 @@ export function HomePage() {
               again.
             </p>
             <Link
-              to="/tracked"
+              href={trackedHref}
               className="mt-6 inline-flex h-10 items-center gap-2 rounded-md border border-ink-200 bg-white px-4 text-sm font-medium transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:hover:bg-neutral-800"
             >
               Open tracked

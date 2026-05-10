@@ -1,6 +1,7 @@
 import { ExternalLink } from "lucide-react";
-import { Link } from "react-router-dom";
+import Link from "next/link";
 import { AvailabilityBadge } from "./AvailabilityBadge";
+import { CategoryMeta } from "./CategoryMeta";
 import { ProductImage } from "./ProductImage";
 import { StoreMark } from "./StoreMark";
 import type { Product } from "../../types/product";
@@ -21,6 +22,7 @@ export function ProductCard({
   product,
   compact = false,
 }: ProductCardProps) {
+  const productPath = `/products/${encodeURIComponent(product.slug)}`;
   const drop = getPriceDrop(product);
   const isLower = drop != null && drop > 0;
   const hasCurrentPrice = hasPrice(product.currentPrice);
@@ -34,7 +36,7 @@ export function ProductCard({
     <article className="w-full min-w-0 overflow-hidden rounded-lg border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
       <div className="flex min-w-0 flex-col sm:flex-row">
         <Link
-          to={`/products/${product.id}`}
+          href={productPath}
           className="block shrink-0 sm:w-[132px]"
           aria-label={`Open ${product.title}`}
         >
@@ -50,7 +52,7 @@ export function ProductCard({
         <div className="min-w-0 flex-1 overflow-hidden p-4 sm:p-5">
           <div className="min-w-0 flex-1">
             <Link
-              to={`/products/${product.id}`}
+              href={productPath}
               className="block min-h-[3rem] overflow-hidden break-words text-[15px] font-semibold leading-6 hover:text-moss-700 sm:min-h-[3.25rem] sm:text-base dark:hover:text-moss-500"
               style={{
                 display: "-webkit-box",
@@ -60,9 +62,12 @@ export function ProductCard({
             >
               {product.title}
             </Link>
-            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-500 dark:text-neutral-400">
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-500 dark:text-neutral-400">
               <StoreMark product={product} />
-              <div>{product.category}</div>
+              <CategoryMeta
+                category={product.category}
+                textClassName="text-ink-500 dark:text-neutral-400"
+              />
             </div>
           </div>
 

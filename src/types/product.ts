@@ -30,6 +30,7 @@ export type PricePoint = {
 
 export type Product = {
   id: string;
+  slug: string;
   title: string;
   storeId?: StoreId;
   store: StoreName;
