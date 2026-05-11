@@ -1,4 +1,4 @@
-import { APP_BASE_URL, SERVER_PRODUCT_API_BASE_URL } from "./server-env";
+import { APP_BASE_URL, SERVER_API_BASE_URL } from "./server-env";
 
 export const SITEMAP_PAGE_SIZE = 5000;
 export const SITEMAP_REVALIDATE_SECONDS = 3600;
@@ -69,7 +69,7 @@ export const buildUrlSetXml = (
 
 export async function fetchProductSitemapSummary(): Promise<ProductSitemapSummary> {
   const response = await fetch(
-    `${SERVER_PRODUCT_API_BASE_URL}/api/products/sitemap?page_size=${SITEMAP_PAGE_SIZE}`,
+    `${SERVER_API_BASE_URL}/api/products/sitemap?page_size=${SITEMAP_PAGE_SIZE}`,
     {
       next: { revalidate: SITEMAP_REVALIDATE_SECONDS },
     },
@@ -84,7 +84,7 @@ export async function fetchProductSitemapSummary(): Promise<ProductSitemapSummar
 
 export async function fetchProductSitemapPage(page: number): Promise<ProductSitemapPage> {
   const response = await fetch(
-    `${SERVER_PRODUCT_API_BASE_URL}/api/products/sitemap/page?page=${page}&page_size=${SITEMAP_PAGE_SIZE}`,
+    `${SERVER_API_BASE_URL}/api/products/sitemap/page?page=${page}&page_size=${SITEMAP_PAGE_SIZE}`,
     {
       next: { revalidate: SITEMAP_REVALIDATE_SECONDS },
     },

@@ -6,10 +6,6 @@ export const SERVER_API_BASE_URL =
   trimTrailingSlash(process.env.NEXT_PUBLIC_PRICE_HISTORY_API_URL) ??
   "http://localhost:8080";
 
-export const SERVER_PRODUCT_API_BASE_URL =
-  trimTrailingSlash(process.env.PRICE_HISTORY_PRODUCT_API_URL) ??
-  SERVER_API_BASE_URL;
-
 export const SCRAPER_API_BASE_URL = trimTrailingSlash(
   process.env.SCRAPER_API_URL,
 );
