@@ -1,7 +1,6 @@
 import {
   PUBLIC_API_BASE_URL,
   PUBLIC_IMAGE_PROXY_BASE_URL,
-  PUBLIC_PRODUCT_API_BASE_URL,
 } from "../lib/client-env";
 import {
   categories,
@@ -145,7 +144,7 @@ export const classifySearchInput = (value: string): SearchInputMode => {
 
 const tryFetchProductBySlug = async (productSlug: string) => {
   const detailResponse = await fetch(
-    `${PUBLIC_PRODUCT_API_BASE_URL}/api/products/${encodeURIComponent(productSlug)}`,
+    `${PUBLIC_API_BASE_URL}/api/products/${encodeURIComponent(productSlug)}`,
   );
 
   if (detailResponse.ok) {
@@ -178,7 +177,7 @@ export const productService = {
     if (filters.category !== "All") params.set("category", filters.category);
 
     try {
-      const products = await fetchJson<Product[]>("/products/search", params, { dedupe: true });
+      const products = await fetchJson<Product[]>("/api/products/search", params, { dedupe: true });
       const normalized = products.map((product) =>
         normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL),
       );
@@ -213,7 +212,7 @@ export const productService = {
     }
 
     try {
-      const products = await fetchJson<Product[]>("/products/search", params, { dedupe: true });
+      const products = await fetchJson<Product[]>("/api/products/search", params, { dedupe: true });
       const normalizedProducts = products.map((product) =>
         normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL),
       );
@@ -227,7 +226,7 @@ export const productService = {
 
   async resolveProductUrl(url: string) {
     const params = new URLSearchParams({ url: url.trim() });
-    const product = await fetchJson<Product>("/products/by-url", params, { dedupe: true });
+    const product = await fetchJson<Product>("/api/products/by-url", params, { dedupe: true });
     const normalizedProduct = normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL);
     rememberLiveProduct(normalizedProduct);
     return normalizedProduct;
