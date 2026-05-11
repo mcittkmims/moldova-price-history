@@ -32,6 +32,7 @@ export type Product = {
   id: string;
   slug: string;
   title: string;
+  brand?: string | null;
   storeId?: StoreId;
   store: StoreName;
   category: ProductCategory;
