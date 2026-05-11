@@ -50,7 +50,7 @@ export const trackedProductService = {
       page: String(page),
       page_size: String(pageSize),
     });
-    const response = await apiFetch(`/me/tracked?${params.toString()}`);
+    const response = await apiFetch(`/api/me/tracked?${params.toString()}`);
 
     if (!response.ok) {
       throw await responseError(response);
@@ -66,7 +66,7 @@ export const trackedProductService = {
   },
 
   async status(slug: string) {
-    const response = await apiFetch(`/me/tracked/${encodeURIComponent(slug)}/status`);
+    const response = await apiFetch(`/api/me/tracked/${encodeURIComponent(slug)}/status`);
 
     if (!response.ok) {
       throw await responseError(response);
@@ -77,7 +77,7 @@ export const trackedProductService = {
   },
 
   async track(slug: string) {
-    const response = await apiFetch("/me/tracked", {
+    const response = await apiFetch("/api/me/tracked", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -93,7 +93,7 @@ export const trackedProductService = {
   },
 
   async untrack(slug: string) {
-    const response = await apiFetch(`/me/tracked/${encodeURIComponent(slug)}`, {
+    const response = await apiFetch(`/api/me/tracked/${encodeURIComponent(slug)}`, {
       method: "DELETE",
     });
 

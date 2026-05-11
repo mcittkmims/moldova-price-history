@@ -60,7 +60,7 @@ export const responseError = async (response: Response) => {
 const fetchCsrf = async () => {
   let response: Response;
   try {
-    response = await fetch(`${PUBLIC_API_BASE_URL}/csrf`, {
+    response = await fetch(`${PUBLIC_API_BASE_URL}/api/csrf`, {
       credentials: "include",
     });
   } catch (error) {

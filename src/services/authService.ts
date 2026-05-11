@@ -39,15 +39,15 @@ const postWithoutBody = async (path: string) => {
 
 export const authService = {
   register(credentials: AuthCredentials) {
-    return postCredentials("/auth/register", credentials);
+    return postCredentials("/api/auth/register", credentials);
   },
 
   login(credentials: AuthCredentials) {
-    return postCredentials("/auth/login", credentials);
+    return postCredentials("/api/auth/login", credentials);
   },
 
   async getSession() {
-    const response = await apiFetch("/auth/session");
+    const response = await apiFetch("/api/auth/session");
 
     if (response.status === 204 || response.status === 401) {
       return null;
@@ -62,7 +62,7 @@ export const authService = {
 
   async logout() {
     try {
-      await postWithoutBody("/auth/logout");
+      await postWithoutBody("/api/auth/logout");
     } finally {
       resetCsrfToken();
     }
