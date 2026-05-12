@@ -1,36 +1,28 @@
+"use client";
+
 import { Github, Linkedin, Mail } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 const contactLinks = [
-  {
-    href: "mailto:adrian@pricehistory.md",
-    label: "Email",
-    icon: Mail,
-  },
-  {
-    href: "https://github.com/mcittkmims",
-    label: "GitHub",
-    icon: Github,
-  },
-  {
-    href: "https://www.linkedin.com/in/adrian-vremere/",
-    label: "LinkedIn",
-    icon: Linkedin,
-  },
+  { href: "mailto:adrian@pricehistory.md", label: "Email", icon: Mail },
+  { href: "https://github.com/mcittkmims", label: "GitHub", icon: Github },
+  { href: "https://www.linkedin.com/in/adrian-vremere/", label: "LinkedIn", icon: Linkedin },
 ];
 
 export function Footer() {
+  const { tr } = useLanguage();
   const year = new Date().getFullYear();
 
   return (
     <footer className="border-t border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
-      <div className="flex w-full flex-col gap-4 px-4 py-5 text-sm text-ink-600 sm:px-6 lg:px-8 dark:text-neutral-400">
+      <div className="page-px flex w-full flex-col gap-4 py-5 text-sm text-ink-600 dark:text-neutral-400">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <div className="font-medium text-ink-900 dark:text-neutral-100">
               pricehistory.md
             </div>
             <div className="mt-1 text-xs">
-              Copyright {year} pricehistory.md. All rights reserved.
+              {tr.footer_copyright(year)}
             </div>
           </div>
 
