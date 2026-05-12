@@ -141,19 +141,7 @@ export function AuthPage({ mode }: AuthPageProps) {
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-[420px] items-center">
-        <div className="w-full rounded-lg border border-ink-200 bg-white p-6 dark:border-neutral-800 dark:bg-[#171717]">
-          <p className="text-sm text-ink-600 dark:text-neutral-300">
-            Checking session...
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
+  if (!isLoading && isAuthenticated) {
     return (
       <div className="mx-auto flex min-h-[calc(100vh-12rem)] w-full max-w-[420px] items-center">
         <div className="w-full rounded-lg border border-ink-200 bg-white p-6 dark:border-neutral-800 dark:bg-[#171717]">
@@ -279,7 +267,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
             <button
               type="submit"
-              disabled={submitting}
+              disabled={isLoading || submitting}
               className="inline-flex h-11 w-full items-center justify-center rounded-md bg-ink-900 px-4 text-sm text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:bg-ink-700/70 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-300 dark:disabled:bg-neutral-300/70"
             >
               {submitting ? "Working..." : content.submitLabel}
