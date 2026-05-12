@@ -2,17 +2,17 @@ import { Github, Linkedin, Mail } from "lucide-react";
 
 const contactLinks = [
   {
-    href: "mailto:hello@pricehistory.md",
+    href: "mailto:adrian@pricehistory.md",
     label: "Email",
     icon: Mail,
   },
   {
-    href: "https://github.com/mcittkmims/moldova-price-history",
+    href: "https://github.com/mcittkmims",
     label: "GitHub",
     icon: Github,
   },
   {
-    href: "https://www.linkedin.com/company/pricehistory-md/",
+    href: "https://www.linkedin.com/in/adrian-vremere/",
     label: "LinkedIn",
     icon: Linkedin,
   },
