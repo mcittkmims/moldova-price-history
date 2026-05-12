@@ -7,36 +7,35 @@ import {
   Store,
 } from "lucide-react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
 
 const watchedProducts = [
   {
     name: "iPhone 15 128 GB",
     store: "Darwin",
-    oldPrice: "15,199 MDL",
-    price: "13,999 MDL",
-    drop: "-1,200 MDL",
-    imageTone: "#111827",
-    imageType: "phone",
+    storeId: "darwin",
+    category: "Smartphones",
+    currentPrice: "13,999 MDL",
+    previousPrice: "15,199 MDL",
+    drop: "1,200 MDL",
+    dropPercent: 8,
+    availability: "In stock",
+    lastChecked: "2 hours ago",
+    imageUrl: "/preview-products/iphone-15.jpg",
   },
   {
-    name: "AirPods Pro 2",
+    name: "AirPods Pro 2nd Gen",
     store: "Ultra",
-    oldPrice: "4,549 MDL",
-    price: "4,199 MDL",
-    drop: "-350 MDL",
-    imageTone: "#f8fafc",
-    imageType: "earbuds",
-  },
-  {
-    name: "Samsung Galaxy A55",
-    store: "Enter",
-    oldPrice: "7,299 MDL",
-    price: "6,799 MDL",
-    drop: "-500 MDL",
-    imageTone: "#f1f5f9",
-    imageType: "phone",
+    storeId: "ultra",
+    category: "Audio",
+    currentPrice: "4,199 MDL",
+    previousPrice: "4,549 MDL",
+    drop: "350 MDL",
+    dropPercent: 8,
+    availability: "In stock",
+    lastChecked: "3 hours ago",
+    imageUrl: "/preview-products/airpods-pro-2.jpg",
   },
 ];
 
@@ -65,29 +64,75 @@ const alertRows = [
   },
 ];
 
-type ProductPreviewImageProps = {
-  name: string;
-  tone: string;
-  type: string;
-};
+type PreviewProduct = (typeof watchedProducts)[number];
 
-function ProductPreviewImage({ name, tone, type }: ProductPreviewImageProps) {
+function PreviewProductCard({ product }: { product: PreviewProduct }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const [faviconFailed, setFaviconFailed] = useState(false);
+  const initials = product.store.split(/[\s.]+/).filter(Boolean).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
+
   return (
-    <div
-      className="grid h-24 place-items-center rounded-md border border-ink-200 dark:border-neutral-700"
-      style={{ backgroundColor: tone }}
-      role="img"
-      aria-label={`${name} product image`}
-    >
-      {type === "earbuds" ? (
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-5 rounded-full border border-ink-300 bg-white/80 dark:border-neutral-500" />
-          <div className="h-10 w-5 rounded-full border border-ink-300 bg-white/80 dark:border-neutral-500" />
+    <article className="w-full min-w-0 overflow-hidden rounded-lg border border-ink-200 bg-white shadow-soft dark:border-neutral-800 dark:bg-[#171717]">
+      <div className="flex min-w-0 flex-col sm:flex-row">
+        <div className="grid shrink-0 place-items-center overflow-hidden border-b border-ink-200 bg-white aspect-[4/3] sm:aspect-auto sm:h-auto sm:min-h-[180px] sm:w-[132px] sm:border-b-0 sm:border-r dark:border-neutral-800">
+          {product.imageUrl && !imgFailed ? (
+            <img
+              src={product.imageUrl}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-contain p-3"
+              onError={() => setImgFailed(true)}
+            />
+          ) : (
+            <div className="h-24 w-16 rounded-md border border-white/70 bg-ink-100 dark:bg-neutral-800 sm:h-20 sm:w-14" />
+          )}
         </div>
-      ) : (
-        <div className="h-16 w-10 rounded-sm border border-white/70 bg-white/30" />
-      )}
-    </div>
+
+        <div className="min-w-0 flex-1 overflow-hidden p-4 sm:p-5">
+          <div className="min-w-0 flex-1">
+            <div
+              className="min-h-[3rem] overflow-hidden break-words text-[15px] font-semibold leading-6 sm:min-h-[3.25rem] sm:text-base"
+              style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 } as React.CSSProperties}
+            >
+              {product.name}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink-500 dark:text-neutral-400">
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <span className="grid h-5 w-5 shrink-0 place-items-center overflow-hidden rounded border border-ink-200 bg-white text-[10px] font-semibold text-ink-600 dark:border-neutral-700">
+                  {!faviconFailed ? (
+                    <img src={`/store-favicons/${product.storeId}.png`} alt="" loading="lazy" className="h-4 w-4 object-contain" onError={() => setFaviconFailed(true)} />
+                  ) : initials}
+                </span>
+                <span className="truncate">{product.store}</span>
+              </span>
+              <span className="text-ink-300 dark:text-neutral-700">·</span>
+              <span>{product.category}</span>
+            </div>
+          </div>
+
+          <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+            <div className="min-w-0">
+              <div className="truncate text-2xl font-semibold sm:text-xl">{product.currentPrice}</div>
+              <div className="mt-1 truncate text-xs text-ink-500 sm:text-sm dark:text-neutral-400">
+                Previous {product.previousPrice}
+              </div>
+            </div>
+            <div className="min-w-0 rounded-2xl bg-ink-50 px-3 py-2 text-xs sm:bg-transparent sm:px-0 sm:py-0 sm:text-right sm:text-sm dark:bg-neutral-800/80 sm:dark:bg-transparent">
+              <div className="font-medium text-moss-700 dark:text-moss-500">{product.drop} lower</div>
+              <div className="mt-1 text-ink-500 dark:text-neutral-400">{product.dropPercent}% since last price</div>
+            </div>
+          </div>
+
+          <div className="mt-4 flex min-w-0 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-t border-ink-200 pt-3 text-xs text-ink-500 sm:gap-3 sm:text-sm dark:border-neutral-800 dark:text-neutral-400">
+            <span className="inline-flex h-7 items-center rounded-md border border-moss-100 bg-white px-2.5 text-xs font-medium text-moss-700 dark:border-moss-900/60 dark:bg-[#171717] dark:text-moss-500">
+              {product.availability}
+            </span>
+            <span className="min-w-0 truncate text-right sm:text-left">Checked {product.lastChecked}</span>
+          </div>
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -222,41 +267,9 @@ export function HomePage() {
               </p>
             </div>
 
-            <div className="mt-6 grid gap-4 md:grid-cols-3">
+            <div className="mt-6 grid gap-4 md:grid-cols-2">
               {watchedProducts.map((product) => (
-                <article
-                  key={product.name}
-                  className="flex min-h-44 flex-col justify-between rounded-lg border border-ink-200 bg-white p-4 shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
-                >
-                  <ProductPreviewImage
-                    name={product.name}
-                    tone={product.imageTone}
-                    type={product.imageType}
-                  />
-
-                  <div className="mt-4 flex items-start justify-between gap-4">
-                    <div className="min-w-0">
-                      <div className="truncate font-medium">
-                        {product.name}
-                      </div>
-                      <div className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-                        {product.store}
-                      </div>
-                    </div>
-                    <div className="text-sm font-medium text-moss-700 dark:text-moss-500">
-                      {product.drop}
-                    </div>
-                  </div>
-
-                  <div className="mt-8 flex items-end justify-between gap-4">
-                    <div className="text-sm text-ink-500 line-through dark:text-neutral-500">
-                      {product.oldPrice}
-                    </div>
-                    <div className="text-right text-xl font-semibold">
-                      {product.price}
-                    </div>
-                  </div>
-                </article>
+                <PreviewProductCard key={product.name} product={product} />
               ))}
             </div>
           </div>
