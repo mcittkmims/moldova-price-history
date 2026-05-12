@@ -9,6 +9,7 @@ import { CategoryMeta } from "../products/CategoryMeta";
 import { ProductImage } from "../products/ProductImage";
 import { StoreMark } from "../products/StoreMark";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { toErrorMessage } from "../../services/apiClient";
 import { productService } from "../../services/productService";
 import { trackedProductService } from "../../services/trackedProductService";
@@ -66,6 +67,7 @@ export function ProductDetailsClient({
   product,
 }: ProductDetailsClientProps) {
   const { hasPermission, isAuthenticated, isLoading } = useAuth();
+  const { tr } = useLanguage();
   const [history, setHistory] = useState<PricePoint[]>([]);
   const [historyRange, setHistoryRange] = useState<HistoryRange>("all");
   const [isTracked, setIsTracked] = useState(false);
@@ -125,7 +127,7 @@ export function ProductDetailsClient({
         }
       } catch (error) {
         if (!cancelled) {
-          setTrackingError(toErrorMessage(error, "Could not check tracking status."));
+          setTrackingError(toErrorMessage(error, tr.product_status_error));
         }
       } finally {
         if (!cancelled) {
@@ -141,7 +143,7 @@ export function ProductDetailsClient({
     return () => {
       cancelled = true;
     };
-  }, [canReadTracking, isAuthenticated, isLoading, product.slug]);
+  }, [canReadTracking, isAuthenticated, isLoading, product.slug, tr.product_status_error]);
 
   const handleToggleTracking = async () => {
     setTrackingBusy(true);
@@ -153,7 +155,7 @@ export function ProductDetailsClient({
         : await trackedProductService.track(product.slug);
       setIsTracked(result.tracked);
     } catch (error) {
-      setTrackingError(toErrorMessage(error, "Could not update tracking."));
+      setTrackingError(toErrorMessage(error, tr.product_track_error));
     } finally {
       setTrackingBusy(false);
     }
@@ -181,7 +183,7 @@ export function ProductDetailsClient({
             className="inline-flex h-10 items-center gap-2 rounded-md border border-ink-300 bg-white px-3 text-sm hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:hover:bg-neutral-800"
           >
             <ExternalLink className="h-4 w-4" />
-            Store page
+            {tr.product_store_page}
           </a>
           {isAuthenticated ? (
             <button
@@ -202,12 +204,12 @@ export function ProductDetailsClient({
             >
               <ShoppingBag className="h-4 w-4" />
               {trackingBusy
-                ? "Updating..."
+                ? tr.product_updating
                 : !trackingReady
-                  ? "Checking..."
+                  ? tr.product_checking
                   : isTracked
-                    ? "Untrack"
-                    : "Track"}
+                    ? tr.product_untrack
+                    : tr.product_track}
             </button>
           ) : (
             <Link
@@ -215,7 +217,7 @@ export function ProductDetailsClient({
               className="inline-flex h-10 items-center gap-2 rounded-md bg-moss-700 px-3 text-sm text-white transition-colors hover:bg-moss-900 dark:bg-moss-600 dark:hover:bg-moss-700"
             >
               <ShoppingBag className="h-4 w-4" />
-              Track
+              {tr.product_track}
             </Link>
           )}
         </div>
@@ -231,9 +233,9 @@ export function ProductDetailsClient({
         <section className="order-2 rounded-lg border border-ink-200 bg-white p-5 shadow-soft xl:order-1 dark:border-neutral-800 dark:bg-[#171717]">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold">Price history</h2>
+              <h2 className="text-lg font-semibold">{tr.product_price_history}</h2>
               <p className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-                Historical prices from the current search service.
+                {tr.product_price_history_sub}
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-3">
@@ -255,7 +257,7 @@ export function ProductDetailsClient({
                 ))}
               </div>
               <div className="text-sm text-ink-500 dark:text-neutral-400">
-                {filteredHistory.length} shown
+                {tr.product_shown(filteredHistory.length)}
               </div>
             </div>
           </div>
@@ -263,7 +265,7 @@ export function ProductDetailsClient({
             <PriceHistoryChart data={filteredHistory} />
           ) : (
             <div className="rounded-md border border-dashed border-ink-200 p-6 text-sm text-ink-500 dark:border-neutral-700 dark:text-neutral-400">
-              No price history is available because the store did not publish a comparable price.
+              {tr.product_no_history}
             </div>
           )}
         </section>
@@ -281,14 +283,14 @@ export function ProductDetailsClient({
           <div className="space-y-5 p-4 sm:p-5">
             <div>
               <div className="text-sm text-ink-500 dark:text-neutral-400">
-                Current price
+                {tr.product_current_price}
               </div>
               <div className="mt-1 text-3xl font-semibold">
                 {formatMdl(product.currentPrice)}
               </div>
               {!hasCurrentPrice ? (
                 <div className="mt-2 text-sm text-ink-500 dark:text-neutral-400">
-                  The store page does not publish a price right now.
+                  {tr.product_no_price}
                 </div>
               ) : null}
             </div>
@@ -296,25 +298,25 @@ export function ProductDetailsClient({
             <dl className="grid grid-cols-2 gap-x-3 gap-y-4 border-t border-ink-200 pt-4 text-sm dark:border-neutral-800">
               <div>
                 <dt className="text-ink-500 dark:text-neutral-400">
-                  Lowest
+                  {tr.product_lowest}
                 </dt>
                 <dd className="mt-1 font-medium">{formatMdl(lowest)}</dd>
               </div>
               <div>
                 <dt className="text-ink-500 dark:text-neutral-400">
-                  Highest
+                  {tr.product_highest}
                 </dt>
                 <dd className="mt-1 font-medium">{formatMdl(highest)}</dd>
               </div>
               <div>
                 <dt className="text-ink-500 dark:text-neutral-400">
-                  Last change
+                  {tr.product_last_change}
                 </dt>
                 <dd className="mt-1 font-medium">{formatMdl(priceDrop)}</dd>
               </div>
               <div>
                 <dt className="text-ink-500 dark:text-neutral-400">
-                  Drop
+                  {tr.product_drop}
                 </dt>
                 <dd className="mt-1 font-medium">
                   {Math.max(getPriceDropPercent(product), 0)}%
@@ -324,7 +326,7 @@ export function ProductDetailsClient({
 
             <div className="border-t border-ink-200 pt-4 text-sm dark:border-neutral-800">
               <div className="flex items-center justify-between gap-3">
-                <span className="text-ink-500 dark:text-neutral-400">Last checked</span>
+                <span className="text-ink-500 dark:text-neutral-400">{tr.product_last_checked}</span>
                 <span className="text-right font-medium text-ink-700 dark:text-neutral-200">
                   {formatDateTime(product.lastChecked)}
                 </span>
@@ -338,7 +340,7 @@ export function ProductDetailsClient({
         href="/search"
         className="inline-flex rounded-md border border-ink-300 px-3 py-2 text-sm hover:bg-ink-50 dark:border-neutral-700 dark:hover:bg-neutral-800"
       >
-        Back to search
+        {tr.product_back}
       </Link>
     </div>
   );

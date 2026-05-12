@@ -6,6 +6,7 @@ import { LoaderCircle } from "lucide-react";
 import { ProductCard } from "../products/ProductCard";
 import { SearchControls } from "../products/SearchControls";
 import { useAppState } from "../../context/AppStateContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { toErrorMessage } from "../../services/apiClient";
 import { categories, classifySearchInput, productService, sortOptions, stores } from "../../services/productService";
 import type {
@@ -63,15 +64,25 @@ function mergeAndSort(prev: Product[], incoming: Product[], sort: ProductSort): 
 export function SearchPage() {
   const router = useRouter();
   const { defaultSort, setDefaultSort } = useAppState();
+  const { tr } = useLanguage();
   const [filters, setFilters] = useState<ProductFilters>(initialFilters);
   const [searchFilters, setSearchFilters] = useState<ProductFilters>(initialFilters);
   const [sort, setSort] = useState<ProductSort>(validSort(defaultSort));
   const [searchSort, setSearchSort] = useState<ProductSort>(validSort(defaultSort));
   const [searchSession, setSearchSession] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
-  const [categoryOptions, setCategoryOptions] = useState<ProductCategoryOption[]>(categories);
+  const [rawCategories, setRawCategories] = useState<ProductCategoryOption[]>(categories);
   const [storeOptions, setStoreOptions] = useState<StoreOption[]>(stores);
-  const [searchSortOptions, setSearchSortOptions] = useState<SortOption[]>(sortOptions);
+  const [rawSortOptions, setRawSortOptions] = useState<SortOption[]>(sortOptions);
+
+  const categoryOptions = rawCategories.map((c) => ({
+    ...c,
+    name: tr.category_names[c.id] ?? c.name,
+  }));
+  const searchSortOptions = rawSortOptions.map((s) => ({
+    ...s,
+    name: tr.sort_names[s.id] ?? s.name,
+  }));
   const [pendingRequests, setPendingRequests] = useState<Set<string>>(new Set());
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -119,19 +130,19 @@ export function SearchPage() {
       .getCategories()
       .then((result) => {
         if (active) {
-          setCategoryOptions(result);
+          setRawCategories(result);
         }
       })
       .catch((error) => {
         console.error(error);
         if (active) {
-          setFilterError("Could not load categories right now.");
+          setFilterError(tr.search_categories_failed);
         }
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [tr.search_categories_failed]);
 
   useEffect(() => {
     let active = true;
@@ -139,19 +150,19 @@ export function SearchPage() {
       .then(([nextStores, nextSortOptions]) => {
         if (active) {
           setStoreOptions(nextStores);
-          setSearchSortOptions(nextSortOptions);
+          setRawSortOptions(nextSortOptions);
         }
       })
       .catch((error) => {
         console.error(error);
         if (active) {
-          setFilterError("Could not load search filters right now.");
+          setFilterError(tr.search_filters_failed);
         }
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [tr.search_filters_failed]);
 
   useEffect(() => {
     if (classifySearchInput(filters.query) !== "keyword") {
@@ -222,12 +233,12 @@ export function SearchPage() {
     const generation = generationRef.current;
 
     if (mode === "unsupported_url") {
-      setSearchError("Paste a product link from Enter, Darwin, Maximum, Smart, Bomba, or Ultra.");
-          setHasMore(false);
-          return;
-        }
+      setSearchError(tr.search_unsupported_url);
+      setHasMore(false);
+      return;
+    }
 
-        if (mode === "supported_url") {
+    if (mode === "supported_url") {
       setResolvingUrl(true);
       setHasMore(false);
       productService
@@ -251,7 +262,7 @@ export function SearchPage() {
           }
 
           setResolvingUrl(false);
-          setSearchError(toErrorMessage(error, "Could not resolve that product link."));
+          setSearchError(toErrorMessage(error, tr.search_resolve_failed));
         });
       return;
     }
@@ -315,8 +326,8 @@ export function SearchPage() {
           exhaustedStoresRef.current.add(storeId);
           setSearchError((current) => current ?? (
             targetStores.length > 1
-              ? "Some store results could not be loaded."
-              : toErrorMessage(error, "Could not load products right now.")
+              ? tr.search_some_failed
+              : toErrorMessage(error, tr.search_resolve_failed)
           ));
           setPendingRequests((prev) => {
             const next = new Set(prev);
@@ -330,7 +341,7 @@ export function SearchPage() {
     if (!dispatchedAny) {
       updateHasMore();
     }
-  }, [page, searchFilters, searchSession, searchSort]);
+  }, [page, searchFilters, searchSession, searchSort, tr]);
 
   const handleSortChange = (nextSort: ProductSort) => {
     setSort(nextSort);
@@ -349,17 +360,17 @@ export function SearchPage() {
     <div className="mx-auto w-full min-w-0 max-w-[1500px] space-y-5 overflow-hidden">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold tracking-normal">Search</h1>
+          <h1 className="text-2xl font-semibold tracking-normal">{tr.search_title}</h1>
           <p className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-            Find products from Moldova stores and add them to your tracked list.
+            {tr.search_subtitle}
           </p>
         </div>
         <div className="text-sm text-ink-500 dark:text-neutral-400">
           {resolvingUrl
-            ? "Resolving link…"
+            ? tr.search_resolving
             : loading
-            ? "Searching…"
-            : `${products.length} result${products.length === 1 ? "" : "s"}`}
+            ? tr.search_searching
+            : tr.search_results(products.length)}
         </div>
       </div>
 
@@ -391,12 +402,10 @@ export function SearchPage() {
           <div>
             <LoaderCircle className="mx-auto h-8 w-8 animate-spin text-moss-700 dark:text-moss-500" />
             <div className="mt-4 text-sm font-medium">
-              {resolvingUrl ? "Opening product page" : "Searching products"}
+              {resolvingUrl ? tr.search_opening : tr.search_checking}
             </div>
             <div className="mt-1 text-sm text-ink-500 dark:text-neutral-400">
-              {resolvingUrl
-                ? "Loading product details."
-                : "Checking Moldova stores for the latest matches."}
+              {resolvingUrl ? tr.search_opening_sub : tr.search_checking_sub}
             </div>
           </div>
         </div>
@@ -421,7 +430,7 @@ export function SearchPage() {
 
       {!loading && !searchError && searchFilters.query.trim() && products.length === 0 ? (
         <div className="rounded-lg border border-ink-200 bg-white p-6 text-sm text-ink-600 shadow-soft dark:border-neutral-800 dark:bg-[#171717] dark:text-neutral-300">
-          No matching products. Try a store name, category, model, or a known product URL.
+          {tr.search_no_results}
         </div>
       ) : null}
     </div>

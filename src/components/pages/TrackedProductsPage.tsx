@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { LoaderCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { toErrorMessage } from "../../services/apiClient";
 import { ProductCard } from "../products/ProductCard";
 import { trackedProductService } from "../../services/trackedProductService";
@@ -11,6 +12,7 @@ import type { Product } from "../../types/product";
 export function TrackedProductsPage() {
   const PAGE_SIZE = 12;
   const { hasPermission, isAuthenticated, isLoading } = useAuth();
+  const { tr } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export function TrackedProductsPage() {
         }
       } catch (error) {
         if (!cancelled) {
-          setErrorMessage(toErrorMessage(error, "Could not load tracked products."));
+          setErrorMessage(toErrorMessage(error, tr.tracked_load_failed));
         }
       } finally {
         if (!cancelled) {
@@ -56,7 +58,7 @@ export function TrackedProductsPage() {
     return () => {
       cancelled = true;
     };
-  }, [PAGE_SIZE, canReadTracking, isAuthenticated, page]);
+  }, [PAGE_SIZE, canReadTracking, isAuthenticated, page, tr.tracked_load_failed]);
 
   const handleUntrack = async (slug: string) => {
     try {
@@ -70,7 +72,7 @@ export function TrackedProductsPage() {
       setProducts(trackedProducts.items);
       setTotalPages(trackedProducts.totalPages);
     } catch (error) {
-      setErrorMessage(toErrorMessage(error, "Could not remove that product."));
+      setErrorMessage(toErrorMessage(error, tr.tracked_remove_failed));
     }
   };
 
@@ -78,7 +80,7 @@ export function TrackedProductsPage() {
     <div className="mx-auto w-full max-w-[1100px] space-y-5">
       <div>
         <h1 className="text-2xl font-semibold tracking-normal">
-          Tracking
+          {tr.tracked_title}
         </h1>
       </div>
 
@@ -94,11 +96,11 @@ export function TrackedProductsPage() {
         </div>
       ) : !isAuthenticated ? null : !canReadTracking ? (
         <div className="rounded-lg border border-ink-200 bg-white px-4 py-6 text-sm text-ink-600 dark:border-neutral-800 dark:bg-[#171717] dark:text-neutral-300">
-          This account cannot view tracked products.
+          {tr.tracked_no_permission}
         </div>
       ) : products.length === 0 ? (
         <div className="rounded-lg border border-ink-200 bg-white px-4 py-6 text-sm text-ink-600 dark:border-neutral-800 dark:bg-[#171717] dark:text-neutral-300">
-          No products tracked at the moment.
+          {tr.tracked_empty}
         </div>
       ) : (
         <div className="space-y-4">
@@ -113,7 +115,7 @@ export function TrackedProductsPage() {
                   }}
                   className="inline-flex h-9 items-center rounded-md border border-ink-200 bg-white px-3 text-sm text-ink-800 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
                 >
-                  Untrack
+                  {tr.tracked_untrack}
                 </button>
               </div>
               <ProductCard product={product} />
@@ -128,10 +130,10 @@ export function TrackedProductsPage() {
                 onClick={() => setPage((currentPage) => currentPage - 1)}
                 className="inline-flex h-9 items-center rounded-md border border-ink-200 bg-white px-3 text-sm text-ink-800 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
               >
-                Previous
+                {tr.tracked_previous}
               </button>
               <div className="text-sm text-ink-500 dark:text-neutral-400">
-                Page {page} of {totalPages}
+                {tr.tracked_page(page, totalPages)}
               </div>
               <button
                 type="button"
@@ -139,7 +141,7 @@ export function TrackedProductsPage() {
                 onClick={() => setPage((currentPage) => currentPage + 1)}
                 className="inline-flex h-9 items-center rounded-md border border-ink-200 bg-white px-3 text-sm text-ink-800 transition-colors hover:bg-ink-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
               >
-                Next
+                {tr.tracked_next}
               </button>
             </div>
           ) : null}
