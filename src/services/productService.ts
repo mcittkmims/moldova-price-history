@@ -171,7 +171,7 @@ export const productService = {
       q: query,
       page: String(page),
       page_size: String(PER_STORE_PAGE_SIZE),
-      stores: storeId,
+      store: storeId,
     });
     if (sort !== "default") params.set("sort", sort);
     if (filters.category !== "All") params.set("category", filters.category);
@@ -189,44 +189,9 @@ export const productService = {
     }
   },
 
-  async searchProducts(filters: ProductFilters, sort: ProductSort, page: number = 1) {
-    const query = filters.query.trim();
-
-    if (!query) {
-      return [];
-    }
-
-    const params = new URLSearchParams({
-      q: query,
-      page: String(page),
-      page_size: "24",
-    });
-    if (sort !== "default") {
-      params.set("sort", sort);
-    }
-    if (filters.store !== "All") {
-      params.set("store", filters.store);
-    }
-    if (filters.category !== "All") {
-      params.set("category", filters.category);
-    }
-
-    try {
-      const products = await fetchJson<Product[]>("/api/products/search", params, { dedupe: true });
-      const normalizedProducts = products.map((product) =>
-        normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL),
-      );
-      normalizedProducts.forEach(rememberLiveProduct);
-      return normalizedProducts;
-    } catch (error) {
-      console.error(error);
-      return [];
-    }
-  },
-
   async resolveProductUrl(url: string) {
     const params = new URLSearchParams({ url: url.trim() });
-    const product = await fetchJson<Product>("/api/products/by-url", params, { dedupe: true });
+    const product = await fetchJson<Product>("/api/products/lookup", params, { dedupe: true });
     const normalizedProduct = normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL);
     rememberLiveProduct(normalizedProduct);
     return normalizedProduct;
