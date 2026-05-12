@@ -4,7 +4,6 @@ import {
   ArrowRight,
   Bell,
   Search,
-  Store,
 } from "lucide-react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
@@ -49,20 +48,6 @@ const trackedStores = [
 
 const storeCarouselGroups = Array.from({ length: 4 }, (_, index) => index);
 
-const alertRows = [
-  {
-    title: "Start tracking once",
-    text: "When you or anyone else starts tracking a product, the app begins recording future price checks for that item.",
-  },
-  {
-    title: "Keep the same history",
-    text: "The price history grows from that first tracked moment, so the record becomes more useful over time.",
-  },
-  {
-    title: "Get the drop",
-    text: "When a watched product moves down from its recorded price, you can see the alert in the app and receive it by email.",
-  },
-];
 
 type PreviewProduct = (typeof watchedProducts)[number];
 
@@ -180,24 +165,40 @@ export function HomePage() {
             </div>
           </div>
 
-          <div className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <div className="font-medium">iPhone 15 128 GB</div>
-                <div className="mt-1 flex items-center gap-1.5 text-sm text-ink-500 dark:text-neutral-400">
-                  <Store className="h-3.5 w-3.5" />
-                  <span>Darwin</span>
-                </div>
+          <div className="flex min-w-0 border-b border-ink-200 dark:border-neutral-800">
+            <div className="grid w-[100px] shrink-0 place-items-center border-r border-ink-200 bg-white dark:border-neutral-800">
+              <img src="/preview-products/iphone-15.jpg" alt="" className="h-full w-full object-contain p-3" />
+            </div>
+            <div className="min-w-0 flex-1 p-4">
+              <div
+                className="overflow-hidden text-[15px] font-semibold leading-5"
+                style={{ display: "-webkit-box", WebkitBoxOrient: "vertical", WebkitLineClamp: 2 } as React.CSSProperties}
+              >
+                iPhone 15 128 GB
               </div>
-              <div className="text-right">
-                <div className="text-xl font-semibold">13,999 MDL</div>
-                <div className="mt-1 text-sm text-moss-700 dark:text-moss-500">
-                  down 1,200 MDL
+              <div className="mt-1.5 flex items-center gap-1.5 text-sm text-ink-500 dark:text-neutral-400">
+                <span className="grid h-5 w-5 shrink-0 place-items-center overflow-hidden rounded border border-ink-200 bg-white dark:border-neutral-700">
+                  <img src="/store-favicons/darwin.png" alt="" className="h-4 w-4 object-contain" />
+                </span>
+                <span>Darwin</span>
+                <span className="text-ink-300 dark:text-neutral-700">·</span>
+                <span>Smartphones</span>
+              </div>
+              <div className="mt-3 flex items-end justify-between gap-2">
+                <div>
+                  <div className="text-xl font-semibold">13,999 MDL</div>
+                  <div className="text-xs text-ink-500 dark:text-neutral-400">Previous 15,199 MDL</div>
+                </div>
+                <div className="text-right text-sm">
+                  <div className="font-medium text-moss-700 dark:text-moss-500">1,200 MDL lower</div>
+                  <div className="text-xs text-ink-500 dark:text-neutral-400">8% since last price</div>
                 </div>
               </div>
             </div>
+          </div>
 
-            <div className="mt-6 h-36 border-y border-ink-200 py-4 dark:border-neutral-800">
+          <div className="p-4">
+            <div className="h-36 border-y border-ink-200 py-4 dark:border-neutral-800">
               <svg
                 viewBox="0 0 360 120"
                 className="h-full w-full"
@@ -292,38 +293,68 @@ export function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-8 py-12 xl:grid-cols-[420px_minmax(0,1fr)] xl:items-stretch">
-        <div className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft sm:p-6 dark:border-neutral-800 dark:bg-[#171717]">
-          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-moss-100 bg-moss-50 text-moss-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-moss-500">
-            <Bell className="h-4 w-4" />
+      <section className="py-12">
+        <div className="flex flex-col items-start gap-8 xl:flex-row xl:items-center xl:justify-between">
+          <div className="max-w-sm">
+            <div className="inline-flex items-center gap-2 rounded-full border border-moss-100 bg-moss-50 px-3 py-1 text-sm font-medium text-moss-700 dark:border-moss-900/40 dark:bg-moss-900/20 dark:text-moss-400">
+              <Bell className="h-3.5 w-3.5" />
+              Price alerts
+            </div>
+            <h2 className="mt-4 text-3xl font-semibold leading-tight">Get notified when it drops.</h2>
+            <p className="mt-3 text-base text-ink-500 dark:text-neutral-400">An email goes out the moment a tracked product falls below its recorded price.</p>
           </div>
-          <div className="mt-5 text-2xl font-semibold leading-tight">
-            AirPods Pro 2 dropped by 350 MDL.
-          </div>
-          <p className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
-            Ultra now lists this watched product at 4,199 MDL. Previous
-            recorded price: 4,549 MDL.
-          </p>
+        <div className="w-full max-w-xl xl:shrink-0">
+          <div className="overflow-hidden rounded-xl border border-ink-200 bg-ink-50 shadow-soft dark:border-neutral-800 dark:bg-neutral-900">
+            {/* Email client chrome */}
+            <div className="border-b border-ink-200 bg-white px-4 py-3 dark:border-neutral-800 dark:bg-[#171717]">
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-100 text-xs font-semibold text-moss-700 dark:bg-moss-900/40 dark:text-moss-400">
+                  P
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium">pricehistory.md</div>
+                  <div className="truncate text-xs text-ink-500 dark:text-neutral-400">noreply@pricehistory.md</div>
+                </div>
+                <div className="ml-auto shrink-0 text-xs text-ink-400 dark:text-neutral-500">just now</div>
+              </div>
+              <div className="mt-2 text-sm font-semibold">AirPods Pro 2 dropped 350 MDL on Ultra</div>
+            </div>
 
-          <div className="mt-6 border-t border-ink-200 pt-4 text-sm dark:border-neutral-800">
-            <div className="mt-1 leading-6 text-ink-500 dark:text-neutral-400">
-              The saved contact receives the same price-drop notice by email.
+            {/* Email body */}
+            <div className="p-5">
+              <div className="overflow-hidden rounded-lg border border-ink-200 bg-white dark:border-neutral-800 dark:bg-[#171717]">
+                <div className="flex items-center gap-4 p-4">
+                  <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-md border border-ink-200 bg-white dark:border-neutral-800">
+                    <img src="/preview-products/airpods-pro-2.jpg" alt="" className="h-full w-full object-contain p-1.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate font-semibold">AirPods Pro 2nd Gen</div>
+                    <div className="mt-0.5 flex items-center gap-1.5 text-sm text-ink-500 dark:text-neutral-400">
+                      <img src="/store-favicons/ultra.png" alt="" className="h-4 w-4 object-contain" />
+                      <span>Ultra</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-end justify-between border-t border-ink-200 px-4 py-4 dark:border-neutral-800">
+                  <div>
+                    <div className="text-2xl font-semibold">4,199 MDL</div>
+                    <div className="text-sm text-ink-400 line-through dark:text-neutral-500">4,549 MDL</div>
+                  </div>
+                  <div className="rounded-md bg-moss-50 px-3 py-1.5 text-lg font-semibold text-moss-700 dark:bg-moss-900/30 dark:text-moss-400">
+                    −350 MDL
+                  </div>
+                </div>
+
+                <div className="border-t border-ink-200 p-4 dark:border-neutral-800">
+                  <div className="flex h-9 w-full items-center justify-center rounded-md bg-ink-900 text-sm font-medium text-white dark:bg-neutral-100 dark:text-neutral-950">
+                    View product
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-
-        <div className="grid gap-4 md:grid-cols-3">
-          {alertRows.map((row) => (
-            <article
-              key={row.title}
-              className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft dark:border-neutral-800 dark:bg-[#171717]"
-            >
-              <div className="text-lg font-semibold">{row.title}</div>
-              <div className="mt-3 text-sm leading-6 text-ink-500 dark:text-neutral-400">
-                {row.text}
-              </div>
-            </article>
-          ))}
         </div>
       </section>
     </div>
