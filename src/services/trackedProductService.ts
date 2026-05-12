@@ -15,6 +15,11 @@ type TrackedStatusPayload = {
   tracked: boolean;
 };
 
+type TrackedProductPayload = {
+  product: Product;
+  tracked: boolean;
+};
+
 const normalizeTrackedProductsPage = (
   payload: TrackedProductsPage | Product[],
   requestedPage: number,
@@ -39,11 +44,6 @@ const normalizeTrackedProductsPage = (
   };
 };
 
-const parseProduct = async (response: Response) => {
-  const product = (await response.json()) as Product;
-  return normalizeProduct(product, PUBLIC_IMAGE_PROXY_BASE_URL);
-};
-
 export const trackedProductService = {
   async list(page: number, pageSize: number) {
     const params = new URLSearchParams({
@@ -66,7 +66,7 @@ export const trackedProductService = {
   },
 
   async status(slug: string) {
-    const response = await apiFetch(`/api/me/tracked/${encodeURIComponent(slug)}/status`);
+    const response = await apiFetch(`/api/me/tracked/${encodeURIComponent(slug)}`);
 
     if (!response.ok) {
       throw await responseError(response);
@@ -77,19 +77,16 @@ export const trackedProductService = {
   },
 
   async track(slug: string) {
-    const response = await apiFetch("/api/me/tracked", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ slug }),
+    const response = await apiFetch(`/api/me/tracked/${encodeURIComponent(slug)}`, {
+      method: "PUT",
     });
 
     if (!response.ok) {
       throw await responseError(response);
     }
 
-    return parseProduct(response);
+    const payload = (await response.json()) as TrackedProductPayload;
+    return { product: normalizeProduct(payload.product, PUBLIC_IMAGE_PROXY_BASE_URL), tracked: payload.tracked };
   },
 
   async untrack(slug: string) {
@@ -100,5 +97,8 @@ export const trackedProductService = {
     if (!response.ok) {
       throw await responseError(response);
     }
+
+    const payload = (await response.json()) as TrackedProductPayload;
+    return { product: normalizeProduct(payload.product, PUBLIC_IMAGE_PROXY_BASE_URL), tracked: payload.tracked };
   },
 };

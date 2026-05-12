@@ -10,8 +10,9 @@ import { ProductImage } from "../products/ProductImage";
 import { StoreMark } from "../products/StoreMark";
 import { useAuth } from "../../context/AuthContext";
 import { toErrorMessage } from "../../services/apiClient";
+import { productService } from "../../services/productService";
 import { trackedProductService } from "../../services/trackedProductService";
-import type { Product } from "../../types/product";
+import type { PricePoint, Product } from "../../types/product";
 import {
   formatDateTime,
   formatMdl,
@@ -65,32 +66,45 @@ export function ProductDetailsClient({
   product,
 }: ProductDetailsClientProps) {
   const { hasPermission, isAuthenticated, isLoading } = useAuth();
+  const [history, setHistory] = useState<PricePoint[]>([]);
   const [historyRange, setHistoryRange] = useState<HistoryRange>("all");
   const [isTracked, setIsTracked] = useState(false);
   const [trackingReady, setTrackingReady] = useState(false);
   const [trackingBusy, setTrackingBusy] = useState(false);
   const [trackingError, setTrackingError] = useState<string | null>(null);
   const priceDrop = getPriceDrop(product);
-  const lowest = getLowestPrice(product.history);
-  const highest = getHighestPrice(product.history);
+  const lowest = getLowestPrice(history);
+  const highest = getHighestPrice(history);
   const hasCurrentPrice = hasPrice(product.currentPrice);
   const filteredHistory = useMemo(() => {
-    if (historyRange === "all" || product.history.length < 2) {
-      return product.history;
+    if (historyRange === "all" || history.length < 2) {
+      return history;
     }
 
-    const latestTimestamp = new Date(product.history[product.history.length - 1]?.date).getTime();
+    const latestTimestamp = new Date(history[history.length - 1]?.date).getTime();
     const rangeStart = getRangeStart(latestTimestamp, historyRange);
-    const withinRange = product.history.filter(
+    const withinRange = history.filter(
       (point) => new Date(point.date).getTime() >= rangeStart,
     );
 
-    return withinRange.length > 0 ? withinRange : product.history.slice(-1);
-  }, [historyRange, product.history]);
+    return withinRange.length > 0 ? withinRange : history.slice(-1);
+  }, [historyRange, history]);
 
   const canReadTracking = hasPermission("tracked:read_own");
   const canTrack = hasPermission("tracked:create_own");
   const canUntrack = hasPermission("tracked:delete_own");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    void productService.productHistory(product.slug).then((data) => {
+      if (!cancelled) setHistory(data.history);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [product.slug]);
 
   useEffect(() => {
     let cancelled = false;
@@ -134,13 +148,10 @@ export function ProductDetailsClient({
     setTrackingError(null);
 
     try {
-      if (isTracked) {
-        await trackedProductService.untrack(product.slug);
-        setIsTracked(false);
-      } else {
-        await trackedProductService.track(product.slug);
-        setIsTracked(true);
-      }
+      const result = isTracked
+        ? await trackedProductService.untrack(product.slug)
+        : await trackedProductService.track(product.slug);
+      setIsTracked(result.tracked);
     } catch (error) {
       setTrackingError(toErrorMessage(error, "Could not update tracking."));
     } finally {
