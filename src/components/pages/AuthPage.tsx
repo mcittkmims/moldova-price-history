@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useMemo, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 type AuthPageMode = "login" | "register";
 
@@ -16,80 +17,9 @@ type AuthFieldErrors = {
   password?: string;
 };
 
-const contentByMode: Record<AuthPageMode, {
-  title: string;
-  submitLabel: string;
-  alternateLabel: string;
-  alternateHref: string;
-  alternateText: string;
-}> = {
-  login: {
-    title: "Sign in",
-    submitLabel: "Sign in",
-    alternateLabel: "Create account",
-    alternateHref: "/register",
-    alternateText: "Need an account?",
-  },
-  register: {
-    title: "Register",
-    submitLabel: "Create account",
-    alternateLabel: "Sign in",
-    alternateHref: "/login",
-    alternateText: "Already registered?",
-  },
-};
-
-const validateUsername = (value: string) => {
-  const username = value.trim();
-
-  if (!username) {
-    return "Username is required.";
-  }
-
-  if (username.length < 3 || username.length > 40) {
-    return "Username must be between 3 and 40 characters.";
-  }
-
-  if (!/^[a-zA-Z0-9._-]+$/.test(username)) {
-    return "Use letters, numbers, dots, underscores, or hyphens only.";
-  }
-
-  return null;
-};
-
-const validatePassword = (value: string) => {
-  if (!value) {
-    return "Password is required.";
-  }
-
-  if (value.length < 8 || value.length > 72) {
-    return "Password must be between 8 and 72 characters.";
-  }
-
-  return null;
-};
-
-const validateCredentials = (username: string, password: string): AuthFieldErrors => {
-  const fieldErrors: AuthFieldErrors = {};
-  const usernameError = validateUsername(username);
-  const passwordError = validatePassword(password);
-
-  if (usernameError) {
-    fieldErrors.username = usernameError;
-  }
-
-  if (passwordError) {
-    fieldErrors.password = passwordError;
-  }
-
-  return fieldErrors;
-};
-
-const hasFieldErrors = (fieldErrors: AuthFieldErrors) =>
-  Object.values(fieldErrors).some((value) => value != null);
-
 export function AuthPage({ mode }: AuthPageProps) {
   const { isAuthenticated, isLoading, login, register } = useAuth();
+  const { tr } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
@@ -98,12 +28,53 @@ export function AuthPage({ mode }: AuthPageProps) {
   const [fieldErrors, setFieldErrors] = useState<AuthFieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const content = contentByMode[mode];
+  const content = mode === "login"
+    ? {
+        title: tr.auth_login_title,
+        submitLabel: tr.auth_login_submit,
+        alternateLabel: tr.auth_login_alt_label,
+        alternateHref: tr.auth_login_alt_href,
+        alternateText: tr.auth_login_alt_text,
+      }
+    : {
+        title: tr.auth_register_title,
+        submitLabel: tr.auth_register_submit,
+        alternateLabel: tr.auth_register_alt_label,
+        alternateHref: tr.auth_register_alt_href,
+        alternateText: tr.auth_register_alt_text,
+      };
+
   const nextPath = useMemo(() => {
     const next = searchParams?.get("next");
     return next && next.startsWith("/") ? next : "/home";
   }, [searchParams]);
   const hasNextParam = searchParams?.get("next") != null;
+
+  const validateUsername = (value: string) => {
+    const u = value.trim();
+    if (!u) return tr.auth_username_required;
+    if (u.length < 3 || u.length > 40) return tr.auth_username_length;
+    if (!/^[a-zA-Z0-9._-]+$/.test(u)) return tr.auth_username_chars;
+    return null;
+  };
+
+  const validatePassword = (value: string) => {
+    if (!value) return tr.auth_password_required;
+    if (value.length < 8 || value.length > 72) return tr.auth_password_length;
+    return null;
+  };
+
+  const validateCredentials = (u: string, p: string): AuthFieldErrors => {
+    const errors: AuthFieldErrors = {};
+    const uErr = validateUsername(u);
+    const pErr = validatePassword(p);
+    if (uErr) errors.username = uErr;
+    if (pErr) errors.password = pErr;
+    return errors;
+  };
+
+  const hasFieldErrors = (errors: AuthFieldErrors) =>
+    Object.values(errors).some((v) => v != null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -128,7 +99,7 @@ export function AuthPage({ mode }: AuthPageProps) {
       router.push(nextPath);
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Could not complete that request.";
+      const message = error instanceof Error ? error.message : tr.auth_fallback_error;
       if (message.toLowerCase().startsWith("username")) {
         setFieldErrors((current) => ({ ...current, username: message }));
       } else if (message.toLowerCase().startsWith("password")) {
@@ -147,20 +118,20 @@ export function AuthPage({ mode }: AuthPageProps) {
         <div className="w-full rounded-lg border border-ink-200 bg-white p-6 dark:border-neutral-800 dark:bg-[#171717]">
           <div className="space-y-4">
             <h1 className="text-2xl font-semibold tracking-normal">
-              Signed in
+              {tr.auth_signed_in}
             </h1>
             <div className="flex flex-col gap-2">
               <Link
                 href={nextPath}
                 className="inline-flex h-10 items-center justify-center rounded-md bg-ink-900 px-4 text-sm text-white transition-colors hover:bg-ink-700 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-300"
               >
-                Continue
+                {tr.auth_continue}
               </Link>
               <Link
                 href="/search"
                 className="inline-flex h-10 items-center justify-center rounded-md border border-ink-200 bg-white px-4 text-sm text-ink-800 transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
               >
-                Browse products
+                {tr.auth_browse}
               </Link>
             </div>
           </div>
@@ -182,7 +153,7 @@ export function AuthPage({ mode }: AuthPageProps) {
           <form className="space-y-4" onSubmit={handleSubmit}>
             <div className="space-y-1.5">
               <label htmlFor="username" className="block text-sm font-medium">
-                Username
+                {tr.auth_username_label}
               </label>
               <input
                 id="username"
@@ -206,11 +177,11 @@ export function AuthPage({ mode }: AuthPageProps) {
                 }
                 aria-invalid={fieldErrors.username != null}
                 className="h-11 w-full rounded-md border border-ink-200 bg-white px-3 text-sm text-ink-900 dark:border-neutral-700 dark:bg-[#111111] dark:text-neutral-100"
-                placeholder="Username"
+                placeholder={tr.auth_username_placeholder}
                 minLength={3}
                 maxLength={40}
                 pattern="^[a-zA-Z0-9._-]+$"
-                title="Use 3 to 40 letters, numbers, dots, underscores, or hyphens."
+                title={tr.auth_username_title}
                 required
               />
               {fieldErrors.username ? (
@@ -222,7 +193,7 @@ export function AuthPage({ mode }: AuthPageProps) {
 
             <div className="space-y-1.5">
               <label htmlFor="password" className="block text-sm font-medium">
-                Password
+                {tr.auth_password_label}
               </label>
               <input
                 id="password"
@@ -247,7 +218,7 @@ export function AuthPage({ mode }: AuthPageProps) {
                 }
                 aria-invalid={fieldErrors.password != null}
                 className="h-11 w-full rounded-md border border-ink-200 bg-white px-3 text-sm text-ink-900 dark:border-neutral-700 dark:bg-[#111111] dark:text-neutral-100"
-                placeholder="Password"
+                placeholder={tr.auth_password_placeholder}
                 minLength={8}
                 maxLength={72}
                 required
@@ -270,7 +241,7 @@ export function AuthPage({ mode }: AuthPageProps) {
               disabled={isLoading || submitting}
               className="inline-flex h-11 w-full items-center justify-center rounded-md bg-ink-900 px-4 text-sm text-white transition-colors hover:bg-ink-700 disabled:cursor-not-allowed disabled:bg-ink-700/70 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-300 dark:disabled:bg-neutral-300/70"
             >
-              {submitting ? "Working..." : content.submitLabel}
+              {submitting ? tr.auth_working : content.submitLabel}
             </button>
           </form>
 

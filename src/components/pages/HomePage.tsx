@@ -8,6 +8,7 @@ import {
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 const watchedProducts = [
   {
@@ -48,10 +49,10 @@ const trackedStores = [
 
 const storeCarouselGroups = Array.from({ length: 4 }, (_, index) => index);
 
-
 type PreviewProduct = (typeof watchedProducts)[number];
 
 function PreviewProductCard({ product }: { product: PreviewProduct }) {
+  const { tr } = useLanguage();
   const [imgFailed, setImgFailed] = useState(false);
   const [faviconFailed, setFaviconFailed] = useState(false);
   const initials = product.store.split(/[\s.]+/).filter(Boolean).map((p) => p[0]).join("").slice(0, 2).toUpperCase();
@@ -100,12 +101,12 @@ function PreviewProductCard({ product }: { product: PreviewProduct }) {
             <div className="min-w-0">
               <div className="truncate text-2xl font-semibold sm:text-xl">{product.currentPrice}</div>
               <div className="mt-1 truncate text-xs text-ink-500 sm:text-sm dark:text-neutral-400">
-                Previous {product.previousPrice}
+                {tr.home_preview_previous(product.previousPrice)}
               </div>
             </div>
             <div className="min-w-0 rounded-2xl bg-ink-50 px-3 py-2 text-xs sm:bg-transparent sm:px-0 sm:py-0 sm:text-right sm:text-sm dark:bg-neutral-800/80 sm:dark:bg-transparent">
-              <div className="font-medium text-moss-700 dark:text-moss-500">{product.drop} lower</div>
-              <div className="mt-1 text-ink-500 dark:text-neutral-400">{product.dropPercent}% since last price</div>
+              <div className="font-medium text-moss-700 dark:text-moss-500">{tr.home_preview_lower(product.drop)}</div>
+              <div className="mt-1 text-ink-500 dark:text-neutral-400">{tr.home_preview_since(product.dropPercent)}</div>
             </div>
           </div>
 
@@ -113,7 +114,7 @@ function PreviewProductCard({ product }: { product: PreviewProduct }) {
             <span className="inline-flex h-7 items-center rounded-md border border-moss-100 bg-white px-2.5 text-xs font-medium text-moss-700 dark:border-moss-900/60 dark:bg-[#171717] dark:text-moss-500">
               {product.availability}
             </span>
-            <span className="min-w-0 truncate text-right sm:text-left">Checked {product.lastChecked}</span>
+            <span className="min-w-0 truncate text-right sm:text-left">{tr.home_preview_checked(product.lastChecked)}</span>
           </div>
         </div>
       </div>
@@ -123,6 +124,7 @@ function PreviewProductCard({ product }: { product: PreviewProduct }) {
 
 export function HomePage() {
   const { isAuthenticated } = useAuth();
+  const { tr } = useLanguage();
   const trackedHref = useMemo(
     () => (isAuthenticated ? "/tracked" : "/login?next=%2Ftracked"),
     [isAuthenticated],
@@ -136,8 +138,7 @@ export function HomePage() {
             pricehistory.md
           </h1>
           <p className="mt-6 max-w-2xl text-xl leading-8 text-ink-600 dark:text-neutral-300">
-            Track Moldova store prices before you buy. Search a product, read
-            its price history, and get notified when a watched item drops.
+            {tr.home_tagline}
           </p>
 
           <div className="mt-8 flex flex-wrap gap-3">
@@ -145,14 +146,14 @@ export function HomePage() {
               href="/search"
               className="inline-flex h-11 items-center gap-2 rounded-md bg-ink-900 px-5 text-sm font-medium text-white transition-colors hover:bg-ink-700 dark:bg-neutral-100 dark:text-neutral-950 dark:hover:bg-neutral-300"
             >
-              Search products
+              {tr.home_search_products}
               <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href={trackedHref}
               className="inline-flex h-11 items-center gap-2 rounded-md border border-ink-200 bg-white px-5 text-sm font-medium text-ink-800 transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:text-neutral-100 dark:hover:bg-neutral-800"
             >
-              View tracked products
+              {tr.home_view_tracked}
             </Link>
           </div>
         </div>
@@ -187,11 +188,11 @@ export function HomePage() {
               <div className="mt-3 flex items-end justify-between gap-2">
                 <div>
                   <div className="text-xl font-semibold">13,999 MDL</div>
-                  <div className="text-xs text-ink-500 dark:text-neutral-400">Previous 15,199 MDL</div>
+                  <div className="text-xs text-ink-500 dark:text-neutral-400">{tr.home_preview_previous("15,199 MDL")}</div>
                 </div>
                 <div className="text-right text-sm">
-                  <div className="font-medium text-moss-700 dark:text-moss-500">1,200 MDL lower</div>
-                  <div className="text-xs text-ink-500 dark:text-neutral-400">8% since last price</div>
+                  <div className="font-medium text-moss-700 dark:text-moss-500">{tr.home_preview_lower("1,200 MDL")}</div>
+                  <div className="text-xs text-ink-500 dark:text-neutral-400">{tr.home_preview_since(8)}</div>
                 </div>
               </div>
             </div>
@@ -228,7 +229,7 @@ export function HomePage() {
       <section className="border-b border-ink-200 py-12 dark:border-neutral-800">
         <div className="mb-6 max-w-3xl">
           <h2 className="text-3xl font-semibold leading-tight">
-            One search surfaces products from popular Moldova stores.
+            {tr.home_one_search}
           </h2>
         </div>
 
@@ -260,11 +261,10 @@ export function HomePage() {
           <div className="rounded-lg border border-ink-200 bg-white p-5 shadow-soft sm:p-6 dark:border-neutral-800 dark:bg-[#171717]">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <h2 className="max-w-xl text-3xl font-semibold leading-tight">
-                Know when the price actually moves.
+                {tr.home_know_when}
               </h2>
               <p className="max-w-md text-base leading-7 text-ink-600 dark:text-neutral-300">
-                Tracked products keep one shared price record after the first
-                saved check, no matter who started watching the item.
+                {tr.home_shared_record}
               </p>
             </div>
 
@@ -276,17 +276,15 @@ export function HomePage() {
           </div>
 
           <aside className="rounded-lg border border-ink-200 bg-ink-50 p-5 shadow-soft sm:p-6 dark:border-neutral-800 dark:bg-neutral-900">
-            <h3 className="text-lg font-semibold">Shared product history</h3>
+            <h3 className="text-lg font-semibold">{tr.home_shared_history}</h3>
             <p className="mt-3 text-sm leading-6 text-ink-600 dark:text-neutral-300">
-              If a product was tracked once, later checks continue that same
-              timeline. The history gets better as the store price is checked
-              again.
+              {tr.home_shared_history_body}
             </p>
             <Link
               href={trackedHref}
               className="mt-6 inline-flex h-10 items-center gap-2 rounded-md border border-ink-200 bg-white px-4 text-sm font-medium transition-colors hover:bg-ink-50 dark:border-neutral-700 dark:bg-[#171717] dark:hover:bg-neutral-800"
             >
-              Open tracked
+              {tr.home_open_tracked}
               <ArrowRight className="h-4 w-4" />
             </Link>
           </aside>
@@ -298,10 +296,10 @@ export function HomePage() {
           <div className="max-w-sm">
             <div className="inline-flex items-center gap-2 rounded-full border border-moss-100 bg-moss-50 px-3 py-1 text-sm font-medium text-moss-700 dark:border-moss-900/40 dark:bg-moss-900/20 dark:text-moss-400">
               <Bell className="h-3.5 w-3.5" />
-              Price alerts
+              {tr.home_price_alerts}
             </div>
-            <h2 className="mt-4 text-3xl font-semibold leading-tight">Get notified when it drops.</h2>
-            <p className="mt-3 text-base text-ink-500 dark:text-neutral-400">An email goes out the moment a tracked product falls below its recorded price.</p>
+            <h2 className="mt-4 text-3xl font-semibold leading-tight">{tr.home_get_notified}</h2>
+            <p className="mt-3 text-base text-ink-500 dark:text-neutral-400">{tr.home_alert_body}</p>
           </div>
         <div className="w-full max-w-xl xl:shrink-0">
           <div className="overflow-hidden rounded-xl border border-ink-200 bg-ink-50 shadow-soft dark:border-neutral-800 dark:bg-neutral-900">
@@ -315,9 +313,9 @@ export function HomePage() {
                   <div className="text-sm font-medium">pricehistory.md</div>
                   <div className="truncate text-xs text-ink-500 dark:text-neutral-400">noreply@pricehistory.md</div>
                 </div>
-                <div className="ml-auto shrink-0 text-xs text-ink-400 dark:text-neutral-500">just now</div>
+                <div className="ml-auto shrink-0 text-xs text-ink-400 dark:text-neutral-500">{tr.home_preview_just_now}</div>
               </div>
-              <div className="mt-2 text-sm font-semibold">AirPods Pro 2 dropped 350 MDL on Ultra</div>
+              <div className="mt-2 text-sm font-semibold">{tr.home_preview_email_subject}</div>
             </div>
 
             {/* Email body */}
@@ -348,7 +346,7 @@ export function HomePage() {
 
                 <div className="border-t border-ink-200 p-4 dark:border-neutral-800">
                   <div className="flex h-9 w-full items-center justify-center rounded-md bg-ink-900 text-sm font-medium text-white dark:bg-neutral-100 dark:text-neutral-950">
-                    View product
+                    {tr.home_preview_view_product}
                   </div>
                 </div>
               </div>
