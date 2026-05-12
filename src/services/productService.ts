@@ -14,6 +14,7 @@ import type {
   Product,
   ProductCategoryOption,
   ProductFilters,
+  ProductHistory,
   ProductSort,
   SortOption,
   StoreOption,
@@ -187,6 +188,10 @@ export const productService = {
       console.error(`[${storeId}] search failed`, error);
       throw error;
     }
+  },
+
+  async productHistory(slug: string) {
+    return fetchJson<ProductHistory>(`/api/products/${encodeURIComponent(slug)}/history`);
   },
 
   async resolveProductUrl(url: string) {

@@ -28,6 +28,10 @@ export type PricePoint = {
   price: number;
 };
 
+export type ProductHistory = {
+  history: PricePoint[];
+};
+
 export type Product = {
   id: string;
   slug: string;
@@ -45,7 +49,6 @@ export type Product = {
   imageTone: string;
   imageUrl?: string | null;
   specs: string[];
-  history: PricePoint[];
   lastChecked: string;
 };
 
